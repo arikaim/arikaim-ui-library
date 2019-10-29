@@ -1,6 +1,6 @@
 
 if (typeof arikaim !== 'object') {
-    throw new Error("Arikaim library not loaded!");   
+    throw new Error('Arikaim library not loaded!');   
 }
 
 /**
@@ -8,6 +8,8 @@ if (typeof arikaim !== 'object') {
  *
  */
 function Table() {
+    var self = this;
+
     this.removeSelectedRows = function(selected) {
         if (isArray(selected) == false) {
             return false;
@@ -23,28 +25,29 @@ function Table() {
  *  Simple template engine parse tags <% var name %>  
  */
 function TemplateEngine() {    
-    var template_tags = ['<%','%>'];
+    var tags = ['<%','%>'];
 
     var parseTemplateVariable = function(name) {        
-        var regexp = new RegExp('[' + template_tags[0] + '][' + template_tags[1] + ']','gi');
+        var regexp = new RegExp('[' + tags[0] + '][' + tags[1] + ']','gi');
         return name.replace(regexp,'').trim();      
     };
 
-    this.render = function(text,data) {
+    this.render = function(text, data) {
         var value = '';
-        var regexp = new RegExp(template_tags[0] + '([^' + template_tags[1] + ']+?)' + template_tags[1],'gi');
+        var regexp = new RegExp(tags[0] + '([^' + tags[1] + ']+?)' + tags[1],'gi');
         var result = text.match(regexp);
 
         if (isArray(result) == false) {
             return text;
         }
         for (var i = 0; i < result.length; i++) {                      
-            var template_variable = parseTemplateVariable(result[0]);
-            if (template_variable != false) {
-                value = getValue(template_variable,data,'');
+            var templateVariable = parseTemplateVariable(result[0]);
+            if (templateVariable != false) {
+                value = getValue(templateVariable,data,'');
             }
             text = text.replace(result[0],value);
         }
+
         return text;
     };
 }
@@ -76,7 +79,7 @@ function Form() {
     };
 
     this.findSubmitButton = function(selector) {
-        var button = $("input[type=submit]",selector);
+        var button = $('input[type=submit]',selector);
 
         if ($(button).length == 0) {
             button = $(selector).find('.save-button');
@@ -88,11 +91,11 @@ function Form() {
         return button;
     };
 
-    this.onSubmit = function(selector, action, onSuccess, onError, submit_button) {
+    this.onSubmit = function(selector, action, onSuccess, onError, submitButton) {
         var deferred = new $.Deferred();
 
-        if (isEmpty(submit_button) == true) {
-            var submit_button = this.findSubmitButton(selector);
+        if (isEmpty(submitButton) == true) {
+            var submitButton = this.findSubmitButton(selector);
         }
 
         $(selector).off();
@@ -100,27 +103,27 @@ function Form() {
             self.clearErrors(selector);
             event.preventDefault();   
             self.disable(selector);
-            arikaim.ui.disableButton(submit_button,true);
+            arikaim.ui.disableButton(submitButton,true);
             var data = self.serialize(selector);
 
             if (self.validate(selector) == false) {    
-                arikaim.ui.enableButton(submit_button);   
+                arikaim.ui.enableButton(submitButton);   
                 self.enable(selector);  
                 self.showValidationErrors(selector);
                 deferred.reject();  
                 callFunction(onError);               
             } else {
                 // form is valid
-                var action_result = callFunction(action,data);
+                var actionResult = callFunction(action,data);
              
-                if (isPromise(action_result) == true) {                   
-                    action_result.done(function(result) {
-                        arikaim.ui.enableButton(submit_button);                        
+                if (isPromise(actionResult) == true) {                   
+                    actionResult.done(function(result) {
+                        arikaim.ui.enableButton(submitButton);                        
                         self.enable(selector); 
                         callFunction(onSuccess,result);
                         deferred.resolve(result); 
                     }).fail(function(errors) { 
-                        arikaim.ui.enableButton(submit_button);                          
+                        arikaim.ui.enableButton(submitButton);                          
                         self.enable(selector);                     
                         self.addFieldErrors(selector,errors);
                         self.showErrors(errors);
@@ -128,8 +131,8 @@ function Form() {
                         callFunction(onError,errors); 
                     });
                 } else {
-                    arikaim.ui.enableButton(submit_button);                      
-                    if (action_result === true) {
+                    arikaim.ui.enableButton(submitButton);                      
+                    if (actionResult === true) {
                         deferred.resolve(data);  
                         callFunction(onSuccess,data);
                     }
@@ -140,18 +143,19 @@ function Form() {
         return deferred.promise();
     };
 
-    this.toObject = function(form_array) {        
+    this.toObject = function(array) {        
         var result = {};
-        if (isArray(form_array) == false) {
+        if (isArray(array) == false) {
             return result;
         }
-        for (var i = 0; i < form_array.length; i++){
-            result[form_array[i]['name']] = form_array[i]['value'];
+        for (var i = 0; i < array.length; i++){
+            result[array[i]['name']] = array[i]['value'];
         }
+
         return result;
     };
 
-    this.addFieldErrors = function(selector,errors) {
+    this.addFieldErrors = function(selector, errors) {
         if (isArray(errors) == false) {
             return false;
         }
@@ -160,17 +164,17 @@ function Form() {
         });
     };
     
-    this.disable = function(selector,css_class) {
-        css_class = getDefaultValue(css_class,'disabled'); 
-        $(selector).children().addClass(css_class);
+    this.disable = function(selector, cssClass) {
+        cssClass = getDefaultValue(cssClass,'disabled'); 
+        $(selector).children().addClass(cssClass);
     };
     
-    this.enable = function(selector,css_class) {
-        css_class = getDefaultValue(css_class,'disabled'); 
-        $(selector).children().removeClass(css_class);
+    this.enable = function(selector, cssClass) {
+        cssClass = getDefaultValue(cssClass,'disabled'); 
+        $(selector).children().removeClass(cssClass);
     };
 
-    this.addRules = function(selector,rules,form_settings) {
+    this.addRules = function(selector, rules) {
         $(selector).form(rules);
         $(selector + ' :input').on('focus',function() {        
             self.clearErrors(selector);
@@ -190,20 +194,20 @@ function Form() {
     };
 
     this.showMessage = function(options) {
-        
         if (isObject(options) == false) {
             options = { message: options };
         }
         var element = getValue('element',options,null); 
-        var css_class = getValue('class',options,null);   
-        var remove_class = getValue('remove_class',options,'error');     
+        var cssClass = getValue('class',options,null);   
+        var removeClass = getValue('remove_class',options,'error');
+
         if (isEmpty(element) == true) {
             element = ($('#message').length == 0) ? '.message' : '#message';
         }
         var message = getValue('message',options,''); 
         var hide = getValue('hide',options,2000);  
-        if (css_class != null) {
-            $(element).addClass(css_class).removeClass(remove_class);
+        if (cssClass != null) {
+            $(element).addClass(cssClass).removeClass(removeClass);
         }
     
         arikaim.ui.show(element);
@@ -230,17 +234,17 @@ function Form() {
             for (var index = 0; index < errors.length; index++) {
                 var error = errors[index];              
                 if (isObject(error) == true) {
-                    var error_label = "";
+                    var errorLabel = '';
                     if (isObject(component) == true) {                     
-                        error_label = component.getProperty(error.field_name + ".label");
+                        errorLabel = component.getProperty(error.field_name + '.label');
                     }
-                    error = "<span>" + error_label + "</span> " + error.message;
+                    error = '<span>' + errorLabel + '</span> ' + error.message;
                 }
-                message += "<li>" + error + "</li>";
+                message += '<li>' + error + '</li>';
             }
         } 
         if (isString(errors) == true) {
-            message = "<li>" + errors + "</li>";
+            message = '<li>' + errors + '</li>';
         }
     
         this.showMessage({
@@ -291,9 +295,9 @@ function ArikaimUI() {
 
     this.initImageLoader = function() {
         $.each($('img'),function() {
-            var data_src = $(this).attr('data-src');
-            if (data_src) {
-                $(this).attr('src',data_src);
+            var dataSrc = $(this).attr('data-src');
+            if (dataSrc) {
+                $(this).attr('src',dataSrc);
             }
         });
     };
@@ -314,19 +318,19 @@ function ArikaimUI() {
         return (isEmpty(value) == true) ? defaultValue : value;
     };
 
-    this.tab = function(selector, content_selector, params_list) {
-        params_list = getDefaultValue(params_list,[]);
-        params_list.push("language"); 
-        params_list.push("uuid");
-        params_list.push("extension");
+    this.tab = function(selector, contentSelector, paramsList) {
+        paramsList = getDefaultValue(paramsList,[]);
+        paramsList.push('language'); 
+        paramsList.push('uuid');
+        paramsList.push('extension');
         selector = getDefaultValue(selector,'.tab-item');
-        content_selector = getDefaultValue(content_selector,'tab_content');
+        contentSelector = getDefaultValue(contentSelector,'tab_content');
 
         this.button(selector,function(element) {
             var component = $(element).attr('component');
             var params = {};
-            if (isArray(params_list) == true) {
-                params_list.forEach(function(value) {
+            if (isArray(paramsList) == true) {
+                paramsList.forEach(function(value) {
                     var attr = self.getAttr(element,value,null);
                     if (attr != null) {
                         params[value] = attr;
@@ -335,16 +339,16 @@ function ArikaimUI() {
             }          
             self.setActiveTab(element,selector);
             return arikaim.page.loadContent({
-                id: content_selector,
+                id: contentSelector,
                 component: component,
                 params: params
             });   
         });
     };
 
-    this.setActiveTab = function(selector, tab_items_selector) {      
-        tab_items_selector = getDefaultValue(tab_items_selector,'.tab-item');
-        $(tab_items_selector).removeClass('active');
+    this.setActiveTab = function(selector, itemsSelector) {      
+        itemsSelector = getDefaultValue(itemsSelector,'.tab-item');
+        $(itemsSelector).removeClass('active');
         $(selector).addClass('active');     
     };
 
@@ -352,8 +356,8 @@ function ArikaimUI() {
         $(element).removeClass('disabled loading');
     };
 
-    this.disableButton = function(element, loading_only) {   
-        if (loading_only == true) {
+    this.disableButton = function(element, loadingOnly) {   
+        if (loadingOnly == true) {
             $(element).addClass('loading');
         } else {
             $(element).addClass('disabled loading');
@@ -381,7 +385,7 @@ function ArikaimUI() {
     
     this.getChecked = function(selector) {
         var selected = [];
-        $(selector + ":checked").each(function(index) {
+        $(selector + ':checked').each(function(index) {
             if (isEmpty($(this).val()) == false) {
                 selected.push($(this).val());
             }           
@@ -397,18 +401,18 @@ function ArikaimUI() {
         }
     };
 
-    this.selectAll = function(element, item_class, icon_selector) {
-        item_class = getDefaultValue(item_class,'.selected-row');
-        icon_selector = getDefaultValue(icon_selector,'#all_icon');
+    this.selectAll = function(element, itemClass, iconSelector) {
+        itemClass = getDefaultValue(itemClass,'.selected-row');
+        iconSelector = getDefaultValue(iconSelector,'#all_icon');
 
         var value = $(element).attr('data-value');
         if (value == 'select') {
-            $(item_class).prop('checked',true);               
+            $(itemClass).prop('checked',true);               
             $(element).attr('data-value','unselect');
-            $(icon_selector).addClass('check');
+            $(iconSelector).addClass('check');
         } else{
-            $(icon_selector).removeClass('check');               
-            $(item_class).prop('checked',false);
+            $(iconSelector).removeClass('check');               
+            $(itemClass).prop('checked',false);
             $(element).attr('data-value','select');
         }    
     };
@@ -423,22 +427,21 @@ function Page() {
     var self = this;
     var properties = {};  
     var name = null;
-    var on_content_ready = null;
+    var onContentReady = null;
     var loader = '';
-    var default_loader = '<div class="ui active blue centered loader"></div>';
-    var default_language = '';
+    var defaultLoader = '<div class="ui active blue centered loader"></div>';  
     var language;
 
-    this.setLoader = function(loader_code) {
-        loader = loader_code
+    this.setLoader = function(loaderHtml) {
+        loader = loaderHtml
     };
 
     this.getLoader = function() {     
-        return (isEmpty(loader) == true) ? default_loader : loader;
+        return (isEmpty(loader) == true) ? defaultLoader : loader;
     };
 
     this.onContentReady = function(callback) {
-        on_content_ready = callback;
+        onContentReady = callback;
     };
 
     this.onReady = function(callback) {        
@@ -450,23 +453,23 @@ function Page() {
     };
 
     this.getProperty = function(property_name) {
-        var data = components[component_name];
-        return (isJSON(data) == true) ? JSON.parse(components[component_name]) : false;        
+        var data = components[name];
+        return (isJSON(data) == true) ? JSON.parse(components[name]) : false;        
     };
 
     this.getPageName = function() {
         return name;
     };
 
-    this.hasLib = function(lib_name) {
-        return (properties.library.indexOf(lib_name) > 0) ? true : false;           
+    this.hasLib = function(libraryName) {
+        return (properties.library.indexOf(libraryName) > 0) ? true : false;           
     };
 
     this.setProperties = function(params) {            
         name = params.name;
         properties = params; 
-        default_language = params.default_language;   
         language = params.language;
+
         return true;
     };
 
@@ -475,23 +478,22 @@ function Page() {
         $(selector).remove();
     };
 
-    this.showLoader = function(element,loader, append) {
+    this.showLoader = function(element, loader, append) {
         append = getDefaultValue(append,false);
         loader = getDefaultValue(loader,this.getLoader());     
-    
         $(element).append(loader);
         $('#loader').dimmer({});
     };
 
-    this.setContent = function(element,content) {
+    this.setContent = function(element, content) {
         $(element).html(content);
     };
 
-    this.replaceContent = function(element,content) {
+    this.replaceContent = function(element, content) {
         $(element).replaceWith(content);
     };
     
-    this.loadProperties = function(name,onSuccess,onError) {
+    this.loadProperties = function(name, onSuccess, onError) {
         name = getDefaultValue(name,'');  
         arikaim.log('Load page properties: ' + name);
         arikaim.get('/core/api/ui/page/properties/' + name,function(result) {          
@@ -505,23 +507,23 @@ function Page() {
         });
     };
 
-    this.loadContent = function(params,onSuccess,onError) {       
-        var component_name = getValue('component',params,'no-name');       
+    this.loadContent = function(params, onSuccess, onError) {       
+        var componentName = getValue('component',params,'no-name');       
         var component_params = getValue('params',params,'');
-        var element_id = getValue('id',params);
+        var elementId = getValue('id',params);
         var element = getValue('element',params);
         var loader = getValue('loader',params,null);
         var replace = getValue('replace',params,false);
-        var use_header = getValue('use_header',params,false);
-        var include_files = getValue('include_files',params,true);
+        var useHeader = getValue('use_header',params,false);
+        var includeFiles = getValue('include_files',params,true);
 
-        if (isEmpty(element_id) == false) {
-            element = '#' + element_id;
+        if (isEmpty(elementId) == false) {
+            element = '#' + elementId;
         }
           
         this.showLoader(element,loader);
     
-        arikaim.component.load(component_name,function(result) { 
+        arikaim.component.load(componentName,function(result) { 
             self.removeLoader(); 
             if (replace == false) {
                 arikaim.page.setContent(element,result.html);
@@ -534,16 +536,16 @@ function Page() {
             self.removeLoader();
             self.showErrorMessage(params,errors);
             callFunction(onError,errors);   
-        },component_params,use_header,include_files);
+        },component_params,useHeader,includeFiles);
     };
 
     this.showErrorMessage = function(params,errors) {
-        var element_id = getValue('id',params);
+        var elementId = getValue('id',params);
         var element = getValue('element',params);
         var message = { message: errors[0] };
         
-        if (isEmpty(element_id) == false) {
-            element = '#' + element_id;
+        if (isEmpty(elementId) == false) {
+            element = '#' + elementId;
         }      
         arikaim.component.load('components:message.error',function(result) { 
             arikaim.page.setContent(element,result.html); 
@@ -552,14 +554,14 @@ function Page() {
 
     this.showSystemErrors = function(errors,element) {
         element = getDefaultValue(element,'.error');
-        $(element + " ul").html("");
+        $(element + ' ul').html('');
         this.show(element);
         if (isObject(errors) == true) {
             $.each(errors, function(key,value) {
-                $(element + " ul").append("<li>" + value + "</li>");
+                $(element + ' ul').append('<li>' + value + '</li>');
             });  
         } else {
-            $(element).append("<li>" + errors + "</li>");
+            $(element).append('<li>' + errors + '</li>');
         }
     };
 
@@ -591,11 +593,12 @@ function Component(prop) {
         return properties;
     };
 
-    this.setProperties = function(json_data) {
-        if (isJSON(json_data) == true) {
-            properties = JSON.parse(json_data);
+    this.setProperties = function(json) {
+        if (isJSON(json) == true) {
+            properties = JSON.parse(json);
             return true;
         }
+
         return false;
     };
 
@@ -613,21 +616,21 @@ function HtmlComponent() {
     var self = this;
     var components = {};
    
-    this.get = function(component_name) {
-        return (isEmpty(components[component_name]) == false) ? components[component_name] : false;          
+    this.get = function(name) {
+        return (isEmpty(components[name]) == false) ? components[name] : false;          
     };
 
     this.getAll = function() {
         return components;
     };
 
-    this.set = function(component_name,component_properties) {
-        var component = new Component(component_properties);
-        components[component_name] = component;
+    this.set = function(name, properties) {
+        var component = new Component(properties);
+        components[name] = component;
     };
 
-    this.resolveUrl = function(component_name,params) {
-        var url = '/core/api/ui/component/' + component_name;
+    this.resolveUrl = function(name, params) {
+        var url = '/core/api/ui/component/' + name;
         if (isEmpty(params) == true) {
             return url;
         }
@@ -636,66 +639,66 @@ function HtmlComponent() {
                 url = url + '/' + params[index];
             }            
         }
+
         return url;
     };
 
-    this.loadContent = function(component_name,onSuccess,onError,params,use_header) {
-        return this.load(component_name,onSuccess,onError,params,use_header,false);
+    this.loadContent = function(name, onSuccess, onError, params, useHeader) {
+        return this.load(name,onSuccess,onError,params,useHeader,false);
     };
     
-    this.loadProperties = function(component_name, params, onSuccess, onError) {        
-        return arikaim.apiCall('/core/api/ui/component/properties/' + component_name,onSuccess,onError,params);      
+    this.loadProperties = function(name, params, onSuccess, onError) {        
+        return arikaim.apiCall('/core/api/ui/component/properties/' + name,onSuccess,onError,params);      
     };
 
-    this.loadDetails = function(component_name, params, onSuccess, onError) {    
-        return arikaim.apiCall('/core/api/ui/component/details/' + component_name,onSuccess,onError,params);      
+    this.loadDetails = function(name, params, onSuccess, onError) {    
+        return arikaim.apiCall('/core/api/ui/component/details/' + name,onSuccess,onError,params);      
     };
 
-    this.load = function(component_name,onSuccess,onError,params,use_header,include_files) {  
-        if (isEmpty(include_files) == true) {
-            include_files = true;
+    this.load = function(name, onSuccess, onError, params, useHeader, includeFiles) {  
+        if (isEmpty(includeFiles) == true) {
+            includeFiles = true;
         }               
-        var url = (use_header == true) ? this.resolveUrl(component_name,params) : this.resolveUrl(component_name,null);
+        var url = (useHeader == true) ? this.resolveUrl(name,params) : this.resolveUrl(name,null);
        
         return arikaim.apiCall(url,'GET',params,function(result) {
-            arikaim.component.set(component_name,result.properties);
+            arikaim.component.set(name,result.properties);
             callFunction(onSuccess,result);
-            if (include_files == true) {
+            if (includeFiles == true) {
                 self.includeFiles(result,function(files_loaded) {   
                     // event
-                    arikaim.log('component ' + component_name + ' loaded!');           
+                    arikaim.log('component ' + name + ' loaded!');           
                 },function(url) {
                     var name = url.split('/').pop();                   
                     // event
                 });
             }
         },function(errors) {
-            arikaim.log('Error loading component ' + component_name);
+            arikaim.log('Error loading component ' + name);
             callFunction(onError,errors);
         });
     };
 
     this.includeFiles = function(response,onSuccess,onFileLoaded) {
-        var js_files  = response.js_files;
-        var css_files = response.css_files;
-        
-        var files_count = 0;
-        var loaded_files = 0;
+        var jsFiles  = response.js_files;
+        var cssFiles = response.css_files;
+        var filesCount = 0;
+        var loadedFiles = 0;
     
-        if (css_files != false) {
-            files_count = files_count + css_files.length;
-            css_files.forEach(function(file) {              
+        if (cssFiles != false) {
+            filesCount = filesCount + cssFiles.length;
+            cssFiles.forEach(function(file) {              
                 arikaim.includeCSSFile(file.url);
-                loaded_files++;
-                if (loaded_files == files_count) {
-                    callFunction(onSuccess,loaded_files);
+                loadedFiles++;
+                if (loadedFiles == filesCount) {
+                    callFunction(onSuccess,loadedFiles);
                 } 
             }, this);
         }
 
-        if (isEmpty(js_files) == false) {
-            var files = Object.values(js_files);
-            files_count = files_count + files.length;
+        if (isEmpty(jsFiles) == false) {
+            var files = Object.values(jsFiles);
+            filesCount = filesCount + files.length;
             
             files.forEach(function(file) {  
                 if (isEmpty(file.params) == false) {
@@ -706,17 +709,17 @@ function HtmlComponent() {
                     }        
                 } else {
                     arikaim.includeScript(file.url,function() {
-                        loaded_files++;
+                        loadedFiles++;
                         callFunction(onFileLoaded,file.url);
-                        if (loaded_files == files_count) {
-                            callFunction(onSuccess,loaded_files);
+                        if (loadedFiles == filesCount) {
+                            callFunction(onSuccess,loadedFiles);
                         }               
                     });
                 }                                            
             }, this);
         }
-        if (loaded_files == files_count) {
-            callFunction(onSuccess,loaded_files);
+        if (loadedFiles == filesCount) {
+            callFunction(onSuccess,loadedFiles);
         }
     };   
 }
