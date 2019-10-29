@@ -318,6 +318,7 @@ function ArikaimUI() {
         params_list = getDefaultValue(params_list,[]);
         params_list.push("language"); 
         params_list.push("uuid");
+        params_list.push("extension");
         selector = getDefaultValue(selector,'.tab-item');
         content_selector = getDefaultValue(content_selector,'tab_content');
 
