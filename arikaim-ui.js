@@ -509,7 +509,7 @@ function Page() {
 
     this.loadContent = function(params, onSuccess, onError) {       
         var componentName = getValue('component',params,'no-name');       
-        var component_params = getValue('params',params,'');
+        var componentParams = getValue('params',params,'');
         var elementId = getValue('id',params);
         var element = getValue('element',params);
         var loader = getValue('loader',params,null);
@@ -536,7 +536,7 @@ function Page() {
             self.removeLoader();
             self.showErrorMessage(params,errors);
             callFunction(onError,errors);   
-        },component_params,useHeader,includeFiles);
+        },componentParams,useHeader,includeFiles);
     };
 
     this.showErrorMessage = function(params,errors) {
@@ -665,7 +665,7 @@ function HtmlComponent() {
             arikaim.component.set(name,result.properties);
             callFunction(onSuccess,result);
             if (includeFiles == true) {
-                self.includeFiles(result,function(files_loaded) {   
+                self.includeFiles(result,function(filesLoaded) {   
                     // event
                     arikaim.log('component ' + name + ' loaded!');           
                 },function(url) {
