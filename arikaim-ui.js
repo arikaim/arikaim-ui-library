@@ -1,3 +1,9 @@
+/**
+ *  Arikaim
+ *  @copyright  Copyright (c) Konstantin Atanasov <info@arikaim.com>
+ *  @license    http://www.arikaim.com/license
+ *  http://www.arikaim.com
+*/
 
 if (typeof arikaim !== 'object') {
     throw new Error('Arikaim library not loaded!');   
@@ -103,7 +109,7 @@ function Form() {
             self.clearErrors(selector);
             event.preventDefault();   
             self.disable(selector);
-            arikaim.ui.disableButton(submitButton,true);
+            arikaim.ui.disableButton(submitButton);
             var data = self.serialize(selector);
 
             if (self.validate(selector) == false) {    
@@ -197,27 +203,28 @@ function Form() {
         if (isObject(options) == false) {
             options = { message: options };
         }
-        var element = getValue('element',options,null); 
+        var selector = getValue('selector',options,null); 
         var cssClass = getValue('class',options,null);   
-        var removeClass = getValue('remove_class',options,'error');
+        var removeClass = getValue('removeClass',options,'error');
 
-        if (isEmpty(element) == true) {
-            element = ($('#message').length == 0) ? '.message' : '#message';
+        if (isEmpty(selector) == true) {
+            selector = ($('#message').length == 0) ? '.message' : '#message';
         }
         var message = getValue('message',options,''); 
         var hide = getValue('hide',options,2000);  
+
         if (cssClass != null) {
-            $(element).addClass(cssClass).removeClass(removeClass);
+            $(selector).addClass(cssClass).removeClass(removeClass);
         }
     
-        arikaim.ui.show(element);
+        arikaim.ui.show(selector);
         if (hide > 0) {
-            $(element).delay(hide).animate({ opacity: 0 }, 200);
+            $(selector).delay(hide).animate({ opacity: 0 }, 200);
         } 
-        if ($(element).find('.header').length != 0) {
-            $(element).find('.header').html(message);
+        if ($(selector).find('.header').length != 0) {
+            $(selector).find('.header').html(message);
         } else {
-            $(element).html(message);
+            $(selector).html(message);
         }       
     };
 
@@ -248,10 +255,10 @@ function Form() {
         }
     
         this.showMessage({
-            element: element,
+            selector: element,
             message: message,
             hide: 0
-        })        
+        });        
     };
 }
 
@@ -271,7 +278,7 @@ function ArikaimUI() {
         $(selector).on('click',function(event) {
             event.stopPropagation();
             var button = this;
-            self.disableButton(button,true);
+            self.disableButton(button);
           
             var result = callFunction(action,this);
             if (isPromise(result) == true) {
@@ -305,6 +312,7 @@ function ArikaimUI() {
     this.viewPasswordButton = function(selector, fieldSelector, toggleClass) {
         toggleClass = getDefaultValue(toggleClass,'slash');
         fieldSelector = getDefaultValue(fieldSelector,'.password-field');
+        
         this.button(selector,function(element) {
             $(element).find('.icon').toggleClass(toggleClass);
             $(fieldSelector).attr('type',function(index, attr) {
@@ -357,9 +365,11 @@ function ArikaimUI() {
     };
 
     this.disableButton = function(element, loadingOnly) {   
+        loadingOnly = getDefaultValue(loadingOnly,false);
+
         if (loadingOnly == true) {
             $(element).addClass('loading');
-        } else {
+        } else {          
             $(element).addClass('disabled loading');
         }            
     };
@@ -389,7 +399,8 @@ function ArikaimUI() {
             if (isEmpty($(this).val()) == false) {
                 selected.push($(this).val());
             }           
-        });       
+        });     
+
         return { selected: selected };
     };
 
@@ -514,8 +525,8 @@ function Page() {
         var element = getValue('element',params);
         var loader = getValue('loader',params,null);
         var replace = getValue('replace',params,false);
-        var useHeader = getValue('use_header',params,false);
-        var includeFiles = getValue('include_files',params,true);
+        var useHeader = getValue('useHeader',params,false);
+        var includeFiles = getValue('includeFiles',params,true);
 
         if (isEmpty(elementId) == false) {
             element = '#' + elementId;
