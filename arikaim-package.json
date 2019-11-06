@@ -1,7 +1,8 @@
 {
     "title": "Arikaim UI",
     "name": "arikaim-ui",
-    "version": "1.0.3",
+    "package-type": "library",
+    "version": "1.0.4",
     "description": "Arikaim UI library",
     "repository": "https://github.com/arikaim/arikaim-ui-library.git",
     "files": [
