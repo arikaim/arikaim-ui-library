@@ -9,6 +9,14 @@ if (typeof arikaim !== 'object') {
     throw new Error('Arikaim library not loaded!');   
 }
 
+function isEmptyElement(selector) {
+    if (isEmpty(selector) == true) {
+        return true;
+    }
+
+    return ($(selector).html().toString().trim() == '');
+}
+
 /**
  * @class Table
  *
@@ -16,12 +24,25 @@ if (typeof arikaim !== 'object') {
 function Table() {
     var self = this;
 
+    this.removeRow = function(rowId, emptyLabel, onEmpty) {
+        emptyLabel = getDefaultValue(emptyLabel,'..');
+        var parent = $(rowId).parent();
+        $(rowId).remove();
+        
+        if (isEmptyElement(parent) == true) {
+            var result = callFunction(onEmpty,parent);
+            if (result !== false) {
+                $(parent).append('<tr><td>' + emptyLabel + '</td></tr>');
+            }           
+        }
+    };
+
     this.removeSelectedRows = function(selected) {
         if (isArray(selected) == false) {
             return false;
         }
         $.each(selected,function(index,value) {
-            $('#' + value).remove();
+            self.removeRow('#' + value);
         });
     };
 }
@@ -442,6 +463,18 @@ function Page() {
     var loader = '';
     var defaultLoader = '<div class="ui active blue centered loader"></div>';  
     var language;
+
+    this.toastMessage = function(message) {
+        if (isObject(message) == false) {
+            message = { 
+                class: 'success',
+                message: message,
+                position: 'bottom right'
+            };
+        } 
+        message.position = getDefaultValue(message.position,'bottom right');
+        $('body').toast(message);
+    };
 
     this.setLoader = function(loaderHtml) {
         loader = loaderHtml
