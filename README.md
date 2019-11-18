@@ -1,5 +1,5 @@
 
-    <img src="https://img.shields.io/github/release/arikaim/arikaim-ui-library.svg" alt="version: 1.0.0">
+    ![version: 1.0.0](https://img.shields.io/github/release/arikaim/arikaim-ui-library.svg)
     <img src="https://img.shields.io/badge/License-GPLv3-blue.svg" alt="license: GPL3">
 
 
