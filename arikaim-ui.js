@@ -18,6 +18,24 @@ function isEmptyElement(selector) {
 }
 
 /**
+ * Text helpers
+ * @class Text
+ */
+function Text() {
+    this.createSlug = function(string) {
+        return string
+            .toString()
+            .trim()
+            .toLowerCase()
+            .replace(/\s+/g, "-")
+            .replace(/[^\w\-]+/g, "")
+            .replace(/\-\-+/g, "-")
+            .replace(/^-+/, "")
+            .replace(/-+$/, "");
+    }
+}
+
+/**
  * @class Table
  *
  */
@@ -768,6 +786,7 @@ function HtmlComponent() {
     };   
 }
 
+Object.assign(arikaim,{ text: new Text() });
 Object.assign(arikaim,{ ui: new ArikaimUI() });
 Object.assign(arikaim,{ page: new Page() });
 Object.assign(arikaim,{ component: new HtmlComponent() });

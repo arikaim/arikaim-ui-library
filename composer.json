@@ -9,8 +9,7 @@
         "email": "info@arikaim.com",
         "homepage": "http://arikaim.com"
     }],
-    "require": {
-        "arikaim/installer": "*"
+    "require": {        
     },
     "extra": {
         "branch-alias": {
