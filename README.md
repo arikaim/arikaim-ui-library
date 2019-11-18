@@ -6,6 +6,8 @@
 ..* Arikaim CMS
 
 ### Install
-```
+```bash
+
 composer require arikaim/arikaim-ui-library
+
 ```
