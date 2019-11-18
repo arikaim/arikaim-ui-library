@@ -3,7 +3,7 @@
 ![license: GPL3](https://img.shields.io/badge/License-GPLv3-blue.svg)
    
 ### Requirements 
-  * ![Arikaim CMS](https://github.com/arikaim/arikaim)
+  * [Arikaim CMS](https://github.com/arikaim/arikaim)
 
 ### Install
 ```bash
