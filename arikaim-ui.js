@@ -247,7 +247,7 @@ function Form() {
         var removeClass = getValue('removeClass',options,'error');
 
         if (isEmpty(selector) == true) {
-            selector = ($('#message').length == 0) ? '.message' : '#message';
+            selector = $('form').find('.success');
         }
         var message = getValue('message',options,''); 
         var hide = getValue('hide',options,2000);  
@@ -273,8 +273,10 @@ function Form() {
         $(selector).find('.error').find('.prompt').remove();
     };   
 
-    this.showErrors = function(errors, element, component) {
-        var element = getDefaultValue(element,'.errors');  
+    this.showErrors = function(errors, selector, component) {
+        if (isEmpty(selector) == true) {
+            selector = $('form').find('.errors');
+        }      
         var message = '';
         if (isArray(errors) == true) {
             for (var index = 0; index < errors.length; index++) {
@@ -294,7 +296,7 @@ function Form() {
         }
     
         this.showMessage({
-            selector: element,
+            selector: selector,
             message: message,
             hide: 0
         });        
