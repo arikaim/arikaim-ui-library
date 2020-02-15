@@ -4,6 +4,7 @@
  *  @license    http://www.arikaim.com/license
  *  http://www.arikaim.com
 */
+"use strict";
 
 if (typeof arikaim !== 'object') {
     throw new Error('Arikaim library not loaded!');   
@@ -512,7 +513,7 @@ function Page() {
     };
 
     this.setLoader = function(loaderHtml) {
-        loader = loaderHtml
+        this.loader = loaderHtml
     };
 
     this.getLoader = function(code) {     
