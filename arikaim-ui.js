@@ -24,8 +24,11 @@ function isEmptyElement(selector) {
  */
 function Text() {
     
-    this.createSlug = function(string) {
-        return string
+    this.createSlug = function(text) {
+        if (isEmpty(text) == true) {
+            return '';
+        }
+        return text
             .toString()
             .trim()
             .toLowerCase()
