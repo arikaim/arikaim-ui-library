@@ -607,6 +607,7 @@ function Page() {
         var loaderClass = getValue('loaderClass',params,'');
         var replace = getValue('replace',params,false);
         var useHeader = getValue('useHeader',params,false);
+        var method = getValue('method',params,'GET');
         var includeFiles = getValue('includeFiles',params,true);
 
         if (isEmpty(elementId) == false) {
@@ -631,7 +632,7 @@ function Page() {
             self.removeLoader();
             self.showErrorMessage(params,errors);
             callFunction(onError,errors);   
-        },componentParams,useHeader,includeFiles);
+        },componentParams,useHeader,includeFiles,method);
     };
 
     this.showErrorMessage = function(params,errors) {
@@ -738,8 +739,8 @@ function HtmlComponent() {
         return url;
     };
 
-    this.loadContent = function(name, onSuccess, onError, params, useHeader) {
-        return this.load(name,onSuccess,onError,params,useHeader,false);
+    this.loadContent = function(name, onSuccess, onError, params, useHeader, method) {
+        return this.load(name,onSuccess,onError,params,useHeader,false,method);
     };
     
     this.loadProperties = function(name, params, onSuccess, onError) {        
@@ -750,13 +751,17 @@ function HtmlComponent() {
         return arikaim.apiCall('/core/api/ui/component/details/' + name,onSuccess,onError,params);      
     };
 
-    this.load = function(name, onSuccess, onError, params, useHeader, includeFiles) {  
+    this.load = function(name, onSuccess, onError, params, useHeader, includeFiles, method) {  
         if (isEmpty(includeFiles) == true) {
             includeFiles = true;
         }               
+        method = getDefaultValue(method,'GET');
+        if (method.toUpperCase() != 'GET') {
+            useHeader = false;
+        }
         var url = (useHeader == true) ? this.resolveUrl(name,params) : this.resolveUrl(name,null);
        
-        return arikaim.apiCall(url,'GET',params,function(result) {
+        return arikaim.apiCall(url,method,params,function(result) {
             arikaim.component.set(name,result.properties);
             callFunction(onSuccess,result);
             if (includeFiles == true) {
