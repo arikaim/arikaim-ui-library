@@ -606,6 +606,7 @@ function Page() {
         var loaderCode = getValue('loader',params,null);
         var loaderClass = getValue('loaderClass',params,'');
         var replace = getValue('replace',params,false);
+        var append = getValue('append',params,false);
         var useHeader = getValue('useHeader',params,false);
         var method = getValue('method',params,'GET');
         var includeFiles = getValue('includeFiles',params,true);
@@ -617,16 +618,24 @@ function Page() {
         if (isEmpty(loaderClass) == false) {
             loader.attr('class',loaderClass);
         }
-        this.showLoader(element,loader);
-    
+        if (append !== true) {
+            this.showLoader(element,loader);
+        }
+
         arikaim.component.load(componentName,function(result) { 
             self.removeLoader(); 
-            if (replace == false) {
-                arikaim.page.setContent(element,result.html);
-            } else {
+            if (append == true) {              
+                $(element).append(result.html);             
+                callFunction(onSuccess,result);    
+                return;
+            }          
+            if (replace == true) {
                 $(element).replaceWith(result.html);
+                callFunction(onSuccess,result);       
+                return;
             }
-            callFunction(onSuccess,result);                       
+            arikaim.page.setContent(element,result.html);         
+            callFunction(onSuccess,result);                                          
         },function(errors) {
             // errors load component
             self.removeLoader();
