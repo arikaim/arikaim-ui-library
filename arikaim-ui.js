@@ -4,7 +4,7 @@
  *  @license    http://www.arikaim.com/license
  *  http://www.arikaim.com
 */
-"use strict";
+'use strict';
 
 if (typeof arikaim !== 'object') {
     throw new Error('Arikaim library not loaded!');   
@@ -349,6 +349,44 @@ function ArikaimUI() {
         });
     };
 
+    this.isActive = function(selector) {
+        if ($(selector).hasClass('active') == true) {
+            return true;
+        }
+        if ($(selector).attr('active') == 'true') {
+            return true;
+        }
+        return false;
+    };
+ 
+    this.setActiveButton = function(selector, groupSelector) {
+        var group = $(groupSelector).children();
+        if (group.length > 0) {
+            $.each(group,function(index,button) {
+                $(button).removeClass('active');
+                $(button).attr('active','false');
+            });
+        }
+        $(selector).addClass('active');
+        $(selector).attr('active','true');
+    };
+
+    this.toggleButton = function(options, onSuccess, onError) {
+        var selector = (isObject(options) == true) ? options.selector : options;
+        var groupSelector = getValue('groupSelector',options,null);  
+        var action = getValue('action',options,null);
+
+        this.button(selector,function(button) {
+            if (self.isActive(selector) == false) {         
+                self.setActiveButton(selector,groupSelector)                
+            } else {              
+                $(selector).removeClass('active');
+                $(selector).attr('active','false');
+            }
+            callFunction(action,$(selector));
+        },onSuccess,onError);
+    }
+
     this.initImageLoader = function() {
         $.each($('img'),function() {
             var dataSrc = $(this).attr('data-src');
@@ -433,22 +471,53 @@ function ArikaimUI() {
         }            
     };
 
-    this.show = function(element) {
-        $(element).show();
-        $(element).removeClass('hidden');
-        $(element).removeClass('invisible');     
-        $(element).css('visibility','visible');
-        $(element).css('opacity','1');
+    this.show = function(selector, options, removeClasses) {
+        removeClasses = getDefaultValue(removeClasses,['hidden','invisible'])
+        $(selector).show(options);
+        $(selector).removeClass(removeClasses);      
+        $(selector).css('visibility','visible');
+        $(selector).css('opacity','1');
     };
 
-    this.hide = function(element,placeholder) {
-        if (placeholder == true) {
-            $(element).css('opacity','0');
+    this.toggle = function(selector, options, removeClasses, placeholder) {
+        var element = (isObject(selector) == true) ? selector.selector : selector;
+        var value = getValue('value',selector,this.isHidden(element));
+
+        if (value == true) {
+            this.show(element,options,removeClasses);
         } else {
-            $(element).hide();
-            $(element).addClass('hidden');
-            $(element).removeClass('visible');
-            $(element).css('visibility','hidden');
+            this.hide(element,placeholder,options);
+        }
+    };
+
+    this.isHidden = function(selector) {
+        if ($(selector).css('display') == 'none' || isEmpty($(selector).css('display') == true)) {
+            return true;
+        } 
+        if ($(selector).is(':visible') == false) {
+            return true;
+        }
+        if ($(selector).is(':hidden') == true) {
+            return true;
+        }             
+        if ($(selector).hasClass('hidden') == true) {
+            return true;
+        }
+        if ($(selector).attr('opacity') == '0') {
+            return true;
+        }
+
+        return false;
+    };
+
+    this.hide = function(selector, placeholder, options) {
+        if (placeholder == true) {
+            $(selector).css('opacity','0');
+        } else {
+            $(selector).hide(options);
+            $(selector).addClass('hidden');
+            $(selector).removeClass('visible');
+            $(selector).css('visibility','hidden');
         }
     };
     
