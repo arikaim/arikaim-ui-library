@@ -151,8 +151,14 @@ function Form() {
         $(selector).off();     
         $(selector).unbind();
         $(selector).on('submit',function(event) {
-            self.clearErrors(selector);
-            event.preventDefault();   
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            if (window.event && window.event.keyCode == 13) {
+                // prevent default form submit 
+                return false;
+            }
+          
+            self.clearErrors(selector);          
             self.disable(selector);
             arikaim.ui.disableButton(submitButton);
             var data = self.serialize(selector);
