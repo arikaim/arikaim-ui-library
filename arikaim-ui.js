@@ -612,7 +612,7 @@ function Page() {
         location.reload(true);
     };
 
-    this.getProperty = function(property_name) {
+    this.getProperty = function(name) {
         var data = components[name];
         return (isJSON(data) == true) ? JSON.parse(components[name]) : false;        
     };
@@ -761,12 +761,13 @@ function Page() {
  * @class Component
  * @param {*} prop 
  */
-function Component(prop) {
+function Component(prop,name) {
     
     var properties = {};
+    this.name = name;
 
-    this.getProperty = function(name) {
-        return getObjectProperty(name,properties);
+    this.getProperty = function(name, defaultvalue) {
+        return getValue(name,properties,defaultvalue);
     };
 
     this.getProperties = function() {
@@ -792,10 +793,11 @@ function Component(prop) {
  * Container for all html components loaded 
  */
 function HtmlComponent() {
-    
     var self = this;
     var components = {};
-   
+    
+    this.onLoaded = null;
+
     this.get = function(name) {
         return (isEmpty(components[name]) == false) ? components[name] : false;          
     };
@@ -805,7 +807,7 @@ function HtmlComponent() {
     };
 
     this.set = function(name, properties) {
-        var component = new Component(properties);
+        var component = new Component(properties,name);
         components[name] = component;
     };
 
@@ -845,17 +847,20 @@ function HtmlComponent() {
         }
         var url = (useHeader == true) ? this.resolveUrl(name,params) : this.resolveUrl(name,null);
        
-        return arikaim.apiCall(url,method,params,function(result) {
-            arikaim.component.set(name,result.properties);
+        return arikaim.apiCall(url,method,params,function(result) {         
+            arikaim.component.set(name,result.properties);         
             callFunction(onSuccess,result);
             if (includeFiles == true) {
                 self.includeFiles(result,function(filesLoaded) {   
                     // event
-                    arikaim.log('component ' + name + ' loaded!');           
+                    arikaim.log('component ' + name + ' loaded!'); 
+                    callFunction(self.onLoaded,self.get(name));          
                 },function(url) {
                     var name = url.split('/').pop();                   
                     // event
                 });
+            } else {
+                callFunction(self.onLoaded,self.get(name)); 
             }
         },function(errors) {
             arikaim.log('Error loading component ' + name);
