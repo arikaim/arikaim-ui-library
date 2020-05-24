@@ -143,13 +143,12 @@ function Form() {
 
     this.onSubmit = function(selector, action, onSuccess, onError, submitButton) {
         var deferred = new $.Deferred();
-
         if (isEmpty(submitButton) == true) {
             var submitButton = this.findSubmitButton(selector);
         }
-
         $(selector).off();     
         $(selector).unbind();
+
         $(selector).on('submit',function(event) {
             event.preventDefault();
             event.stopImmediatePropagation();
@@ -157,7 +156,7 @@ function Form() {
                 // prevent default form submit 
                 return false;
             }
-          
+           
             self.clearErrors(selector);          
             self.disable(selector);
             arikaim.ui.disableButton(submitButton);
@@ -196,7 +195,7 @@ function Form() {
                 }
             }
         });
-
+     
         return deferred.promise();
     };
 
@@ -232,6 +231,15 @@ function Form() {
     };
 
     this.addRules = function(selector, rules) {
+
+        if (isEmpty(rules.onFailure) == true) {
+            rules.onInvalid = function(error) {
+                var message = $(selector).find('.errors.message');
+                if ($(message).is(':empty') == true) {
+                    message.append('<li>' + error + '</li>');
+                }
+            }
+        };        
         $(selector).form(rules);
         $(selector + ' :input').on('focus',function() {        
             self.clearErrors(selector);
@@ -243,7 +251,13 @@ function Form() {
         return $(selector).form('is valid');
     };
 
-    this.showValidationErrors = function(selector) {       
+    this.showValidationErrors = function(selector) {      
+        var fields = $(selector).form('get dirty fields');
+    
+        fields.each(function(index, field)  {
+            $(selector).form('validate field',field.name);
+        });
+      
         var message = $(selector).find('.errors.message');
         if (isObject(message) == true) {
             arikaim.ui.show(message);
@@ -280,7 +294,9 @@ function Form() {
     };
 
     this.clearErrors = function(selector) {      
+        $(selector).find('.errors.message').html('');
         $(selector).find('.errors').html('');    
+        $(selector).find('.errors.list').remove();
         $(selector).find('.errors').hide();
         $(selector).find('.error').find('.prompt').remove();
     };   
