@@ -230,8 +230,34 @@ function Form() {
         $(selector).children().removeClass(cssClass);
     };
 
+    this.buildRules = function(selector) {       
+        var fields = $(selector).find('input, textarea, select');
+        var rules = {   
+            fields: {},
+            inline: false,
+        };
+    
+        $.each(fields,function(index,field) {
+            var rule = $(field).attr('rule');
+            var fieldId = $(field).attr('id');
+            var fieldName = $(field).attr('name');
+            if (isEmpty(rule) == false) {
+                rules.fields[fieldName] = {
+                    identifier: fieldId,
+                    rules: [{ type: rule }]
+                }
+            }
+           
+        });
+      
+        return rules;
+    };
+
     this.addRules = function(selector, rules) {
 
+        if (isEmpty(rules) == true) {
+            rules = this.buildRules(selector);
+        }
         if (isEmpty(rules.onFailure) == true) {
             rules.onInvalid = function(error) {
                 var message = $(selector).find('.errors.message');
