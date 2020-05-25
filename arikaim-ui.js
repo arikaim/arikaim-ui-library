@@ -236,7 +236,7 @@ function Form() {
             rules.onInvalid = function(error) {
                 var message = $(selector).find('.errors.message');
                 if ($(message).is(':empty') == true) {
-                    message.append('<li>' + error + '</li>');
+                    $(selector).form('add prompt',$(this).attr('name'),error);              
                 }
             }
         };        
