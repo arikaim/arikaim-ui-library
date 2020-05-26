@@ -230,34 +230,40 @@ function Form() {
         $(selector).children().removeClass(cssClass);
     };
 
-    this.buildRules = function(selector) {       
+    this.buildRules = function(selector, rules) {       
         var fields = $(selector).find('input, textarea, select');
-        var rules = {   
-            fields: {},
-            inline: false,
-        };
+        if (isEmpty(rules) == true) {
+            rules = {   
+                fields: {},
+                inline: false,
+            };
+        }
     
         $.each(fields,function(index,field) {
             var rule = $(field).attr('rule');
             var fieldId = $(field).attr('id');
             var fieldName = $(field).attr('name');
+
             if (isEmpty(rule) == false) {
                 rules.fields[fieldName] = {
                     identifier: fieldId,
                     rules: [{ type: rule }]
-                }
+                };
             }
-           
+            if (isEmpty(rules.fields[fieldName]) == true) {
+                rules.fields[fieldName] = {
+                    identifier: fieldId,
+                    optional: true
+                };
+            }           
         });
       
         return rules;
     };
 
     this.addRules = function(selector, rules) {
-
-        if (isEmpty(rules) == true) {
-            rules = this.buildRules(selector);
-        }
+        rules = this.buildRules(selector,rules);
+       
         if (isEmpty(rules.onFailure) == true) {
             rules.onInvalid = function(error) {
                 var message = $(selector).find('.errors.message');
