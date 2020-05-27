@@ -255,9 +255,8 @@ function Form() {
         var optional = $(field).attr('optional');
         var fieldId = $(field).attr('id');  
         var errorPrompt = $(field).attr('error-prompt');
-        if (isEmpty(errorPrompt) == false) {
-            errorPrompt = errorPrompt.split(',');
-        }
+        errorPrompt = (isEmpty(errorPrompt) == false) ? errorPrompt.split(',') : null;
+           
         var result = {
             identifier: fieldId
         };
@@ -271,7 +270,8 @@ function Form() {
             var ruleItem = {
                 type: item
             };
-            if (isEmpty(errorPrompt[index]) == false) {
+           
+            if (isEmpty(errorPrompt) == false) {
                 ruleItem.prompt = errorPrompt[index];
             }
             if (isEmpty(ruleValue) == false) {
@@ -285,7 +285,23 @@ function Form() {
         return result;
     };
 
+    this.addValidationRule = function(name, callback) {
+        if (isFunction($.fn.form.settings.rules[name]) == false) {
+            $.fn.form.settings.rules[name] = callback;
+        }
+    };
+
     this.addRules = function(selector, rules) {
+        // custom rules 
+        this.addValidationRule('scriptTag',function(value) {
+            var regexp = /<script\b[^>]*>([\s\S]*?)/gmi          
+            return !value.match(regexp);
+        });
+        this.addValidationRule('htmlTags',function(value) {
+            var regexp = /<[a-z][\s\S]*>/i       
+            return !value.match(regexp);
+        });
+
         rules = this.buildRules(selector,rules);
        
         if (isEmpty(rules.onFailure) == true) {
@@ -386,7 +402,7 @@ function Form() {
             message: message,
             hide: 0
         });        
-    };
+    };   
 }
 
 /**
