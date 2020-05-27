@@ -240,25 +240,46 @@ function Form() {
         }
     
         $.each(fields,function(index,field) {
-            var rule = $(field).attr('rule');
-            var fieldId = $(field).attr('id');
             var fieldName = $(field).attr('name');
-
-            if (isEmpty(rule) == false) {
-                rules.fields[fieldName] = {
-                    identifier: fieldId,
-                    rules: [{ type: rule }]
-                };
-            }
             if (isEmpty(rules.fields[fieldName]) == true) {
-                rules.fields[fieldName] = {
-                    identifier: fieldId,
-                    optional: true
-                };
+                rules.fields[fieldName] = self.createRule(field);
             }           
         });
       
         return rules;
+    };
+
+    this.createRule = function(field) {
+        var rule = $(field).attr('rule');
+        var ruleValue = $(field).attr('rule-value');
+        var optional = $(field).attr('optional');
+        var fieldId = $(field).attr('id');  
+        var errorPrompt = $(field).attr('error-prompt');
+        var result = {
+            identifier: fieldId
+        }
+        if (isEmpty(rule) == true) {
+            result.optional = true;
+            return result;
+        }
+
+        var items = rule.split(',');
+        var rules = [];
+        var ruleItem = {};
+        $.each(items,function(index,item) {
+            ruleItem.type = item;
+            if (isEmpty(errorPrompt) == false) {
+                ruleItem.prompt = errorPrompt;
+            }
+            if (isEmpty(ruleValue) == false) {
+                ruleItem.value = ruleValue;
+            }
+            rules.push(ruleItem);           
+        });
+        result.rules = rules;
+        result.optional = (optional == 'true') ? true : false;
+               
+        return result;
     };
 
     this.addRules = function(selector, rules) {
