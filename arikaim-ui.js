@@ -255,21 +255,24 @@ function Form() {
         var optional = $(field).attr('optional');
         var fieldId = $(field).attr('id');  
         var errorPrompt = $(field).attr('error-prompt');
+        if (isEmpty(errorPrompt) == false) {
+            errorPrompt = errorPrompt.split(',');
+        }
         var result = {
             identifier: fieldId
-        }
+        };
         if (isEmpty(rule) == true) {
             result.optional = true;
             return result;
         }
-
         var items = rule.split(',');
         var rules = [];
-        var ruleItem = {};
         $.each(items,function(index,item) {
-            ruleItem.type = item;
-            if (isEmpty(errorPrompt) == false) {
-                ruleItem.prompt = errorPrompt;
+            var ruleItem = {
+                type: item
+            };
+            if (isEmpty(errorPrompt[index]) == false) {
+                ruleItem.prompt = errorPrompt[index];
             }
             if (isEmpty(ruleValue) == false) {
                 ruleItem.value = ruleValue;
@@ -278,7 +281,7 @@ function Form() {
         });
         result.rules = rules;
         result.optional = (optional == 'true') ? true : false;
-               
+                      
         return result;
     };
 
