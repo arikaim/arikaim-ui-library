@@ -141,6 +141,29 @@ function Form() {
         return button;
     };
 
+    this.serialize = function(selector, replaceFields) {
+        var data = $(selector).serializeArray();
+        if (isEmpty(replaceFields) == true) {
+            return data;
+        }
+        Object.entries(replaceFields).forEach(function([key,value]) {
+            data = self.replaceValue(data,key,value);
+        });
+
+        return data;
+    };
+
+    this.replaceValue = function(formData, fieldName, fieldValue) {
+
+        formData.forEach(function(item,index) {
+            if (item.name == fieldName) {
+                formData[index].value = fieldValue
+            }
+        });
+
+        return formData;
+    };
+
     this.onSubmit = function(selector, action, onSuccess, onError, submitButton) {
         var deferred = new $.Deferred();
         if (isEmpty(submitButton) == true) {
