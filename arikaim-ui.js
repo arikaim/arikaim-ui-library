@@ -146,8 +146,8 @@ function Form() {
         if (isEmpty(replaceFields) == true) {
             return data;
         }
-        Object.entries(replaceFields).forEach(function([key,value]) {
-            data = self.replaceValue(data,key,value);
+        Object.entries(replaceFields).forEach(function(item) {           
+            data = self.replaceValue(data,item[0],item[1]);
         });
 
         return data;
@@ -796,6 +796,7 @@ function Page() {
         var useHeader = getValue('useHeader',params,false);
         var method = getValue('method',params,'GET');
         var includeFiles = getValue('includeFiles',params,true);
+        var disableRedirect = getValue('disableRedirect',params,false);
 
         if (isEmpty(elementId) == false) {
             element = '#' + elementId;
@@ -822,11 +823,16 @@ function Page() {
             }
             arikaim.page.setContent(element,result.html);         
             callFunction(onSuccess,result);                                          
-        },function(errors) {
+        },function(errors,options) {
             // errors load component
             self.removeLoader();
             self.showErrorMessage(params,errors);
-            callFunction(onError,errors);   
+            if (disableRedirect == false && isEmpty(options.redirect) == false) {
+                // redirect to error or login page
+                arikaim.loadUrl(options.redirect,true);
+            } 
+          
+            callFunction(onError,errors,null,options);   
         },componentParams,useHeader,includeFiles,method);
     };
 
@@ -949,9 +955,7 @@ function HtmlComponent() {
     };
 
     this.load = function(name, onSuccess, onError, params, useHeader, includeFiles, method) {  
-        if (isEmpty(includeFiles) == true) {
-            includeFiles = true;
-        }               
+        includeFiles = (isEmpty(includeFiles) == true) ? true : includeFiles;                     
         method = getDefaultValue(method,'GET');
         if (method.toUpperCase() != 'GET') {
             useHeader = false;
@@ -965,17 +969,19 @@ function HtmlComponent() {
                 self.includeFiles(result,function(filesLoaded) {   
                     // event
                     arikaim.log('component ' + name + ' loaded!'); 
-                    callFunction(self.onLoaded,self.get(name));          
-                },function(url) {
-                    var name = url.split('/').pop();                   
-                    // event
+                    callFunction(self.onLoaded,self.get(name));  
+                    // fire event 
+                    arikaim.events.emit('component.loaded.' + name,name);       
                 });
             } else {
-                callFunction(self.onLoaded,self.get(name)); 
+                arikaim.log('component ' + name + ' loaded!'); 
+                callFunction(self.onLoaded,self.get(name));  
+                // fire event 
+                arikaim.events.emit('component.loaded.' + name,name);                                   
             }
-        },function(errors) {
+        },function(errors,options) {
             arikaim.log('Error loading component ' + name);
-            callFunction(onError,errors);
+            callFunction(onError,errors,null,options);
         });
     };
 
