@@ -38,6 +38,15 @@ function Text() {
             .replace(/^-+/, "")
             .replace(/-+$/, "");
     }
+
+    this.escapeHtml = function(html) {
+        return html
+             .replace(/&/g, "&amp;")
+             .replace(/</g, "&lt;")
+             .replace(/>/g, "&gt;")
+             .replace(/"/g, "&quot;")
+             .replace(/'/g, "&#039;");
+    };
 }
 
 /**
@@ -115,6 +124,7 @@ function Form() {
         $(selector).each(function() {  
             this.reset();
         }); 
+        this.clearErrors(selector);
     };
 
     this.populate = function (selector, data) {
@@ -954,6 +964,15 @@ function HtmlComponent() {
         return arikaim.apiCall('/core/api/ui/component/details/' + name,onSuccess,onError,params);      
     };
 
+    this.loadLibrary = function(name, onSuccess, onError) {
+        arikaim.get('/core/api/ui/library/' + name,function(requestResult) {
+            self.includeFiles(requestResult,function(result) {  
+                arikaim.log('Library ' + name + ' loaded.');             
+                callFunction(onSuccess,requestResult);
+            });
+        },onError);
+    };
+
     this.load = function(name, onSuccess, onError, params, useHeader, includeFiles, method) {  
         includeFiles = (isEmpty(includeFiles) == true) ? true : includeFiles;                     
         method = getDefaultValue(method,'GET');
@@ -985,7 +1004,7 @@ function HtmlComponent() {
         });
     };
 
-    this.includeFiles = function(response,onSuccess,onFileLoaded) {
+    this.includeFiles = function(response, onSuccess, onFileLoaded) {
         var jsFiles  = response.js_files;
         var cssFiles = response.css_files;
         var filesCount = 0;
