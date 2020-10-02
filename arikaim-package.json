@@ -6,7 +6,7 @@
     "description": "Arikaim UI library",
     "repository": "https://github.com/arikaim/arikaim-ui-library.git",
     "files": [
-        "arikaim-ui-1.2.15.min.js"
+        "arikaim-ui-1.2.16.min.js"
     ],
     "versions": {
         "1.2.12": {

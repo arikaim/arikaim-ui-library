@@ -24,6 +24,20 @@ function isEmptyElement(selector) {
  */
 function Text() {
     
+    this.versionCompare = function(version1, version2) {
+        var parts1 = version1.split('.')
+        var parts2 = version2.split('.')
+
+        for (var i = 0; i < parts2.length; i++) {
+            var a = parseInt(parts2[i]) || 0
+            var b = parseInt(parts1[i]) || 0
+            if (a > b) return true;
+            if (a < b) return false;
+        }
+
+        return false
+    };
+
     this.createSlug = function(text) {
         if (isEmpty(text) == true) {
             return '';
@@ -117,6 +131,10 @@ function TemplateEngine() {
  */
 function Form() {
     var self = this;
+
+    this.getSettings = function() {
+        return (isEmpty($.fn.form.settings) == true) ? null : $.fn.form.settings;        
+    };
 
     this.clear = function(selector) {
         $(selector)[0].reset();
@@ -358,7 +376,7 @@ function Form() {
 
     this.showValidationErrors = function(selector) {      
         var fields = $(selector).form('get dirty fields');
-    
+        
         fields.each(function(index, field)  {
             $(selector).form('validate field',field.name);
         });
@@ -694,8 +712,8 @@ function Page() {
     var properties = {};  
     var name = null;
     var onContentReady = null;
-    var defaultLoader = '<div class="ui active blue centered loader"></div>';  
-    var language;
+    var defaultLoader = '<div class="ui active blue centered loader" id="loader"></div>';  
+    var language = null;
 
     this.loader = '';
 
@@ -712,13 +730,18 @@ function Page() {
     };
 
     this.setLoader = function(loaderHtml) {
-        this.loader = loaderHtml
+        this.loader = loaderHtml;
+    };
+
+    this.initPageLoader = function() {
+        var code = $('.loader-code').html();
+        if (isEmpty(code) == false) {
+            this.loader = code;
+        }
     };
 
     this.getLoader = function(code) {     
-        var code = ((isEmpty(code) == true) && (isEmpty(this.loader) == true)) ? defaultLoader : this.loader;
-
-        return $(code);
+        return ((isEmpty(code) == true) && (isEmpty(this.loader) == true)) ? defaultLoader : this.loader;      
     };
 
     this.onContentReady = function(callback) {
@@ -767,9 +790,7 @@ function Page() {
             $(selector).append(loader);
         } else {
             $(selector).html(loader);
-        }
-      
-        $('#loader').dimmer({});
+        }     
     };
 
     this.setContent = function(element, content) {
@@ -784,8 +805,7 @@ function Page() {
         name = getDefaultValue(name,'');  
         arikaim.log('Load page properties: ' + name);
         arikaim.get('/core/api/ui/page/properties/' + name,function(result) {          
-            self.setProperties(result.properties);                     
-            self.setLoader(getValue('properties.loader',result,''));
+            self.setProperties(result.properties);                                
             arikaim.log('Page properties loaded!');
             callFunction(onSuccess,result);
         },function(errors) {
@@ -813,7 +833,7 @@ function Page() {
         }
         var loader = this.getLoader(loaderCode);
         if (isEmpty(loaderClass) == false) {
-            loader.attr('class',loaderClass);
+            $('#loader').attr('class',loaderClass);
         }
         if (append !== true) {
             this.showLoader(element,loader);
@@ -846,7 +866,7 @@ function Page() {
         },componentParams,useHeader,includeFiles,method);
     };
 
-    this.showErrorMessage = function(params,errors) {
+    this.showErrorMessage = function(params, errors) {
         var elementId = getValue('id',params);
         var element = getValue('element',params);
         var message = { message: errors[0] };
@@ -859,7 +879,7 @@ function Page() {
         },null,message);
     };
 
-    this.showSystemErrors = function(errors,element) {
+    this.showSystemErrors = function(errors, element) {
         element = getDefaultValue(element,'.error');
         $(element + ' ul').html('');
         this.show(element);
@@ -872,7 +892,7 @@ function Page() {
         }
     };
 
-    this.loadPage = function(name,onSuccess,onError) {    
+    this.loadPage = function(name, onSuccess, onError) {    
         this.log('Load page: ' + name);
         this.get('/core/api/ui/page/' + name,function(result) {
             arikiam.log('Page ' + name + ' loaded!'); 
@@ -1053,3 +1073,7 @@ Object.assign(arikaim,{ text: new Text() });
 Object.assign(arikaim,{ ui: new ArikaimUI() });
 Object.assign(arikaim,{ page: new Page() });
 Object.assign(arikaim,{ component: new HtmlComponent() });
+
+$(document).ready(function() {
+    arikaim.page.initPageLoader();
+});
