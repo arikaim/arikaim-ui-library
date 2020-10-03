@@ -24,18 +24,31 @@ function isEmptyElement(selector) {
  */
 function Text() {
     
+    this.parseVersion = function(version) {
+        version = getDefaultValue(version,'0.0.0');
+        var tokens = version.split('.');
+
+        return {
+            major:  (isEmpty(tokens[0]) == true) ? 0 : parseInt(tokens[0]),
+            minor:  (isEmpty(tokens[1]) == true) ? 0 : parseInt(tokens[1]),
+            patch:  (isEmpty(tokens[2]) == true) ? 0 : parseInt(tokens[2])
+        }       
+    }
+
     this.versionCompare = function(version1, version2) {
-        var parts1 = version1.split('.')
-        var parts2 = version2.split('.')
+        version1 = this.parseVersion(version1);
+        version2 = this.parseVersion(version2);
+       
+        if (version1.major > version2.major) return true;                   
+        if (version1.major == version2.major) {
+            
+            if (version1.minor > version2.minor) return true;
+            if (version1.minor == version2.minor) {
+                if (version1.patch > version2.patch) return true;
+            }
+        } 
 
-        for (var i = 0; i < parts2.length; i++) {
-            var a = parseInt(parts2[i]) || 0
-            var b = parseInt(parts1[i]) || 0
-            if (a > b) return true;
-            if (a < b) return false;
-        }
-
-        return false
+        return false;
     };
 
     this.createSlug = function(text) {
