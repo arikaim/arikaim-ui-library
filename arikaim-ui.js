@@ -480,6 +480,7 @@ function ArikaimUI() {
     this.template = new TemplateEngine();
     this.table = new Table();
 
+    
     this.button = function(selector, action, onSuccess, onError) {      
         $(selector).off();
         $(selector).on('click',function(event) {
@@ -544,6 +545,15 @@ function ArikaimUI() {
             callFunction(action,$(selector));
         },onSuccess,onError);
     }
+
+    this.setEmptyImageOnError = function(selector, imageSrc) {
+        $(selector).on('error',function() {
+            if (isString(imageSrc) == true) {
+                $(this).attr('src',imageSrc);
+            } 
+            callFunction(imageSrc,this);          
+        });
+    };
 
     this.initImageLoader = function() {
         $.each($('img'),function() {
