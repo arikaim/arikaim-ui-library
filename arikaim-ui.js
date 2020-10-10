@@ -83,15 +83,25 @@ function Text() {
 function Table() {
     var self = this;
 
-    this.removeRow = function(rowId, emptyLabel, onEmpty) {
+    this.emptyRowCode = '<tr class="empty-row"><td colspan="<% colspan %>"><% empytLabel %></td></tr>';
+
+    this.getEmptyRowHmtlCode = function(params) {
+        return arikaim.ui.template.render(this.emptyRowCode,params);       
+    };
+
+    this.removeRow = function(rowId, emptyLabel, onEmpty, colSpan) {
         emptyLabel = getDefaultValue(emptyLabel,'..');
+        colSpan = getDefaultValue(colSpan,1);
         var parent = $(rowId).parent();
         $(rowId).remove();
         
         if (isEmptyElement(parent) == true) {
             var result = callFunction(onEmpty,parent);
             if (result !== false) {
-                $(parent).append('<tr><td>' + emptyLabel + '</td></tr>');
+                $(parent).append(this.getEmptyRowHmtlCode({ 
+                    colspan: colSpan,
+                    empytLabel: emptyLabel
+                }));
             }           
         }
     };
@@ -126,12 +136,13 @@ function TemplateEngine() {
         if (isArray(result) == false) {
             return text;
         }
+ 
         for (var i = 0; i < result.length; i++) {                      
-            var templateVariable = parseTemplateVariable(result[0]);
-            if (templateVariable != false) {
+            var templateVariable = parseTemplateVariable(result[i]);
+            if (templateVariable !== false) {
                 value = getValue(templateVariable,data,'');
             }
-            text = text.replace(result[0],value);
+            text = text.replace(result[i],value);
         }
 
         return text;
