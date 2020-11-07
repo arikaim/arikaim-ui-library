@@ -2,11 +2,11 @@
     "title": "Arikaim UI",
     "name": "arikaim-ui",
     "package-type": "library",
-    "version": "1.2.19",
+    "version": "1.2.20",
     "description": "Arikaim UI library",
     "repository": "https://github.com/arikaim/arikaim-ui-library.git",
     "files": [
-        "arikaim-ui-1.2.19.min.js"
+        "arikaim-ui-1.2.20.min.js"
     ],
     "versions": {
         "1.2.12": {

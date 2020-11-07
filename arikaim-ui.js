@@ -1019,7 +1019,7 @@ function HtmlComponent() {
     };
 
     this.loadLibrary = function(name, onSuccess, onError) {
-        arikaim.get('/core/api/ui/library/' + name,function(requestResult) {
+        arikaim.get('/core/api/ui/library/' + name,function(requestResult) {           
             self.includeFiles(requestResult,function(result) {  
                 arikaim.log('Library ' + name + ' loaded.');             
                 callFunction(onSuccess,requestResult);
@@ -1063,18 +1063,16 @@ function HtmlComponent() {
         var cssFiles = response.css_files;
         var filesCount = 0;
         var loadedFiles = 0;
-    
+
+        // load css files
         if (cssFiles != false) {
             filesCount = filesCount + cssFiles.length;
-            cssFiles.forEach(function(file) {              
+            cssFiles.forEach(function(file) {       
                 arikaim.includeCSSFile(file.url);
                 loadedFiles++;
-                if (loadedFiles == filesCount) {
-                    callFunction(onSuccess,loadedFiles);
-                } 
             }, this);
         }
-
+        // load js files
         if (isEmpty(jsFiles) == false) {
             var files = Object.values(jsFiles);
             filesCount = filesCount + files.length;
@@ -1085,20 +1083,23 @@ function HtmlComponent() {
                         var async = (file.params.indexOf('async') > -1) ? true : false;
                         var crossorigin = (file.params.indexOf('crossorigin') > -1) ? 'anonymous' : null;
                         arikaim.loadScript(file.url,async,crossorigin);
+                        loadedFiles++;
+                        // check if all files are loaded
+                        if (loadedFiles == filesCount) {
+                            callFunction(onSuccess,loadedFiles);
+                        }
                     }        
                 } else {
                     arikaim.includeScript(file.url,function() {
-                        loadedFiles++;
-                        callFunction(onFileLoaded,file.url);
+                        loadedFiles++;                     
+                        callFunction(onFileLoaded,file.url);  
+                        // check if all files are loaded
                         if (loadedFiles == filesCount) {
                             callFunction(onSuccess,loadedFiles);
-                        }               
+                        }
                     });
                 }                                            
             }, this);
-        }
-        if (loadedFiles == filesCount) {
-            callFunction(onSuccess,loadedFiles);
         }
     };   
 }
