@@ -23,7 +23,46 @@ function isEmptyElement(selector) {
  * @class Text
  */
 function Text() {
-    
+      
+    this.hexNumber = function(number, length) {
+        var result = number.toString(16).toUpperCase();
+        while(result.length < length) {
+            result = '0' + result;
+        }
+           
+        return result;
+    };
+   
+    this.unicodeText = function(text) {
+        var i;
+        var result = '';
+        for(i = 0; i < text.length; ++i){           
+            result += (this.isASCII(text,i) == true) ? text[i] : "\\u" + this.hexNumber(text.charCodeAt(i),4);              
+        }
+
+        return result;
+    }
+
+    this.isASCII = function(text, index) {
+        index = getDefaultValue(index,0);
+        return !(text.charCodeAt(index) > 126 || text.charCodeAt(index) < 32); 
+    };
+
+    this.replaceUmlautChars = function(text) {
+        text = text.toLowerCase();
+        text = text.replace(/ä/g,'ae');
+        text = text.replace(/æ/g,'ae');
+        text = text.replace(/å/g,'aa');
+        text = text.replace(/ö/g,'oe');
+        text = text.replace(/ø/g,'oe');
+        text = text.replace(/ü/g,'ue');
+        text = text.replace(/ß/g,'ss');
+        text = text.replace(/é/g,'e');
+        text = text.replace(/è/g,'e');
+        
+        return text;
+    };
+
     this.parseVersion = function(version) {
         version = getDefaultValue(version,'0.0.0');
         var tokens = version.split('.');
@@ -55,15 +94,10 @@ function Text() {
         if (isEmpty(text) == true) {
             return '';
         }
-        return text
-            .toString()
-            .trim()
-            .toLowerCase()
-            .replace(/\s+/g, "-")
-            .replace(/[^\w\-]+/g, "")
-            .replace(/\-\-+/g, "-")
-            .replace(/^-+/, "")
-            .replace(/-+$/, "");
+        var text = text.toString().trim().toLowerCase();
+        text = this.replaceUmlautChars(text);
+
+        return text.replace(/\s+/g,'-').replace(/\-\-+/g,'-');
     }
 
     this.escapeHtml = function(html) {
