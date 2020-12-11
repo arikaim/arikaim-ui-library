@@ -36,7 +36,7 @@ function Text() {
     this.unicodeText = function(text) {
         var i;
         var result = '';
-        for(i = 0; i < text.length; ++i){           
+        for(i = 0; i < text.length; ++i) {           
             result += (this.isASCII(text,i) == true) ? text[i] : "\\u" + this.hexNumber(text.charCodeAt(i),4);              
         }
 
@@ -59,7 +59,8 @@ function Text() {
         text = text.replace(/ß/g,'ss');
         text = text.replace(/é/g,'e');
         text = text.replace(/è/g,'e');
-        
+        text = text.replace(/ó/g,'o');
+
         return text;
     };
 
@@ -575,6 +576,16 @@ function ArikaimUI() {
         $(selector).attr('active','true');
     };
 
+    this.setButtonGroupInactive = function(groupSelector) {
+        var group = $(groupSelector).children();
+        if (group.length > 0) {
+            $.each(group,function(index,button) {
+                $(button).removeClass('active');
+                $(button).attr('active','false');
+            });
+        }
+    };
+
     this.toggleButton = function(options, onSuccess, onError) {
         var selector = (isObject(options) == true) ? options.selector : options;
         var groupSelector = getValue('groupSelector',options,null);  
@@ -821,7 +832,7 @@ function Page() {
     };
 
     this.reload = function() {
-        location.reload(true);
+        location.reload();
     };
 
     this.getProperty = function(name) {
@@ -891,6 +902,7 @@ function Page() {
         var loaderClass = getValue('loaderClass',params,'');
         var replace = getValue('replace',params,false);
         var append = getValue('append',params,false);
+        var hideLoader = getValue('hideLoader',params,false);
         var useHeader = getValue('useHeader',params,false);
         var method = getValue('method',params,'GET');
         var includeFiles = getValue('includeFiles',params,true);
@@ -903,7 +915,7 @@ function Page() {
         if (isEmpty(loaderClass) == false) {
             $('#loader').attr('class',loaderClass);
         }
-        if (append !== true) {
+        if (append !== true && hideLoader !== true) {
             this.showLoader(element,loader);
         }
 
