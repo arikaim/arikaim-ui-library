@@ -15,7 +15,7 @@ function isEmptyElement(selector) {
         return true;
     }
 
-    return ($(selector).html().toString().trim() == '');
+    return ($(selector).length == 0 || $(selector).html().toString().trim() == '');
 }
 
 /**
@@ -521,12 +521,16 @@ function Form() {
  */
 function ArikaimUI() {
     var self = this;
-    
+    var version = '1.3.0';
+
     this.form = new Form();
     this.template = new TemplateEngine();
     this.table = new Table();
 
-    
+    this.getVersion = function() {
+        return version;
+    } 
+
     this.button = function(selector, action, onSuccess, onError) {      
         $(selector).off();
         $(selector).on('click',function(event) {
@@ -786,11 +790,9 @@ function ArikaimUI() {
  *  
  */
 function Page() {
-    
     var self = this;
     var properties = {};  
     var name = null;
-    var onContentReady = null;
     var defaultLoader = '<div class="ui active blue centered loader" id="loader"></div>';  
     var language = null;
 
@@ -812,19 +814,16 @@ function Page() {
         this.loader = loaderHtml;
     };
 
-    this.initPageLoader = function() {
+    this.init = function() {
         var code = $('.loader-code').html();
         if (isEmpty(code) == false) {
             this.loader = code;
         }
+        console.log('Arikaim UI version ' + arikaim.ui.getVersion());
     };
 
     this.getLoader = function(code) {     
         return ((isEmpty(code) == true) && (isEmpty(this.loader) == true)) ? defaultLoader : this.loader;      
-    };
-
-    this.onContentReady = function(callback) {
-        onContentReady = callback;
     };
 
     this.onReady = function(callback) {        
@@ -833,11 +832,6 @@ function Page() {
 
     this.reload = function() {
         location.reload();
-    };
-
-    this.getProperty = function(name) {
-        var data = components[name];
-        return (isJSON(data) == true) ? JSON.parse(components[name]) : false;        
     };
 
     this.getPageName = function() {
@@ -893,7 +887,7 @@ function Page() {
         });
     };
 
-    this.loadContent = function(params, onSuccess, onError) {       
+    this.loadContent = function(params, onSuccess, onError) {     
         var componentName = getValue('component',params,'no-name');       
         var componentParams = getValue('params',params,'');
         var elementId = getValue('id',params);
@@ -922,17 +916,24 @@ function Page() {
         arikaim.component.load(componentName,function(result) { 
             self.removeLoader(); 
             if (append == true) {              
-                $(element).append(result.html);             
+                $(element).append(result.html);    
+                // dispatch load components
+                arikaim.component.dispatchLoadedEvent(result.components,result,onSuccess);          
                 callFunction(onSuccess,result);    
                 return;
             }          
             if (replace == true) {
                 $(element).replaceWith(result.html);
+                // dispatch load components
+                arikaim.component.dispatchLoadedEvent(result.components,result,onSuccess);  
                 callFunction(onSuccess,result);       
                 return;
             }
-            arikaim.page.setContent(element,result.html);         
-            callFunction(onSuccess,result);                                          
+            arikaim.page.setContent(element,result.html);    
+            // dispatch load components
+            arikaim.component.dispatchLoadedEvent(result.components,result,onSuccess);       
+            callFunction(onSuccess,result);  
+
         },function(errors,options) {
             // errors load component
             self.removeLoader();
@@ -985,57 +986,92 @@ function Page() {
 } 
 
 /**
+ * Html component
  * @class Component
  * @param {*} prop 
  */
-function Component(prop,name) {
-    
-    var properties = {};
-    this.name = name;
+function Component(data) {    
+    var data = data;
 
-    this.getProperty = function(name, defaultvalue) {
-        return getValue(name,properties,defaultvalue);
+    this.name = getValue('name',data,null);
+
+    this.getProperty = function(name, defaultValue) {
+        return getValue(name,properties,defaultValue);
+    };
+
+    this.getJsFiles = function() {
+        return getValue('js',data,[]);
+    };
+
+    this.getIncludedComponents = function() {
+        return getValue('components',data,[]);
+    };
+
+    this.getCssFiles = function() {
+        return getValue('css',data,[]);
     };
 
     this.getProperties = function() {
-        return properties;
+        return getValue('properties',data,{});
     };
 
-    this.setProperties = function(json) {
-        if (isJSON(json) == true) {
-            properties = JSON.parse(json);
-            return true;
-        }
-
-        return false;
+    this.getHtmlCode = function() {
+        return getValue('html',data,'');
     };
 
-    if (isEmpty(prop) == false) {
-        this.setProperties(prop);
-    }
+    this.getName = function() {
+        return this.name;
+    };
 }
 
 /**
  * @class HtmlComponents
  * Container for all html components loaded 
  */
-function HtmlComponent() {
-    var self = this;
-    var components = {};
-    
-    this.onLoaded = null;
+function HtmlComponents() {
+    var self = this; 
+    var onReady = null;
 
-    this.get = function(name) {
-        return (isEmpty(components[name]) == false) ? components[name] : false;          
+    this.loadedScripts = [];
+    this.loadedListeners = [];
+
+    this.clear = function() {
+        this.loadedScripts = [];
+        this.loadedListeners = [];
     };
 
-    this.getAll = function() {
-        return components;
+    this.getCurrentComponent = function() {
+        return window['arikaimComponentName'];
     };
 
-    this.set = function(name, properties) {
-        var component = new Component(properties,name);
-        components[name] = component;
+    this.ready = function(callback) {
+        onReady = callback;
+    };
+
+    this.onLoaded = function(callback, name) {
+        $(document).ready(callback);
+        name = (isEmpty(name) == true) ? this.getCurrentComponent() : name;
+          
+        if (isEmpty(name) == false) {
+            this.loadedListeners[name] = callback;
+        }
+    };
+
+    this.dispatchLoadedEvent = function(components, params, onSuccess) {
+        var component = new Component(params)
+
+        components.forEach(function(name) {
+            window['arikaimComponentName'] = name;
+            
+            callFunction(self.loadedListeners[name],component);
+        });
+        
+        if (components.length > 0) {
+            arikaim.log('components loaded ' + components); 
+        }
+      
+        callFunction(onSuccess,component);
+        callFunction(onReady,components);
     };
 
     this.resolveUrl = function(name, params) {
@@ -1082,21 +1118,12 @@ function HtmlComponent() {
         var url = (useHeader == true) ? this.resolveUrl(name,params) : this.resolveUrl(name,null);
        
         return arikaim.apiCall(url,method,params,function(result) {         
-            arikaim.component.set(name,result.properties);         
-            callFunction(onSuccess,result);
             if (includeFiles == true) {
-                self.includeFiles(result,function(filesLoaded) {   
-                    // event
-                    arikaim.log('component ' + name + ' loaded!'); 
-                    callFunction(self.onLoaded,self.get(name));  
-                    // fire event 
-                    arikaim.events.emit('component.loaded.' + name,name);       
+                self.includeFiles(result,function() {   
+                    callFunction(onSuccess,result);                                       
                 });
             } else {
-                arikaim.log('component ' + name + ' loaded!'); 
-                callFunction(self.onLoaded,self.get(name));  
-                // fire event 
-                arikaim.events.emit('component.loaded.' + name,name);                                   
+                callFunction(onSuccess,result);                          
             }
         },function(errors,options) {
             arikaim.log('Error loading component ' + name);
@@ -1104,57 +1131,78 @@ function HtmlComponent() {
         });
     };
 
-    this.includeFiles = function(response, onSuccess, onFileLoaded) {
-        var jsFiles  = response.js_files;
-        var cssFiles = response.css_files;
-        var filesCount = 0;
+    this.loadScripts = function(files) {
+        var deferred = jQuery.Deferred();
+        
+        function loadScript(i) {
+            if (i >= files.length) {
+                deferred.resolve();
+                return;
+            }
+            if (self.loadedScripts.indexOf(files[i].url) !== -1) {
+                // script is loaded load next
+                loadScript(i + 1);
+                return;
+            }
+
+            if (isEmpty(files[i].params) == false) {
+                var async = (files[i].params.indexOf('async') > -1) ? true : false;
+                var crossorigin = (files[i].params.indexOf('crossorigin') > -1) ? 'anonymous' : null;  
+                window['arikaimComponentName'] = files[i].component_name;             
+                
+                arikaim.loadScript(files[i].url,async,crossorigin);
+                self.loadedScripts.push(files[i].url);                
+                loadScript(i + 1);
+            } else {
+                window['arikaimComponentName'] = files[i].component_name;      
+
+                arikaim.includeScript(files[i].url,function() {  
+                    self.loadedScripts.push(files[i].url);                          
+                    loadScript(i + 1);
+                });    
+            } 
+        }
+        loadScript(0);
+
+        return deferred;    
+    };
+
+    this.includeFiles = function(response, onSuccess, onError) {
+        var jsFiles  = response.js;
+        var cssFiles = response.css;
         var loadedFiles = 0;
 
         // load css files
-        if (cssFiles != false) {
-            filesCount = filesCount + cssFiles.length;
+        if (cssFiles.length > 0) {           
             cssFiles.forEach(function(file) {       
+                if (self.loadedScripts.indexOf(file.url) !== -1) {
+                    return true;
+                }
                 arikaim.includeCSSFile(file.url);
-                loadedFiles++;
+                self.loadedScripts.push(file.url);   
             }, this);
         }
+        
         // load js files
-        if (isEmpty(jsFiles) == false) {
-            var files = Object.values(jsFiles);
-            filesCount = filesCount + files.length;
-            
-            files.forEach(function(file) {  
-                if (isEmpty(file.params) == false) {
-                    if (arikaim.findScript(file.url) == false) {                      
-                        var async = (file.params.indexOf('async') > -1) ? true : false;
-                        var crossorigin = (file.params.indexOf('crossorigin') > -1) ? 'anonymous' : null;
-                        arikaim.loadScript(file.url,async,crossorigin);
-                        loadedFiles++;
-                        // check if all files are loaded
-                        if (loadedFiles == filesCount) {
-                            callFunction(onSuccess,loadedFiles);
-                        }
-                    }        
-                } else {
-                    arikaim.includeScript(file.url,function() {
-                        loadedFiles++;                     
-                        callFunction(onFileLoaded,file.url);  
-                        // check if all files are loaded
-                        if (loadedFiles == filesCount) {
-                            callFunction(onSuccess,loadedFiles);
-                        }
-                    });
-                }                                            
-            }, this);
+        var files = Object.values(jsFiles);
+        if (files.length == 0) {
+            callFunction(onSuccess,loadedFiles);
+            return;
         }
+
+        this.loadScripts(files).done(function() {
+            callFunction(onSuccess,loadedFiles);
+        }).catch(function() {
+            callFunction(onError);
+        });
     };   
 }
 
 Object.assign(arikaim,{ text: new Text() });
 Object.assign(arikaim,{ ui: new ArikaimUI() });
 Object.assign(arikaim,{ page: new Page() });
-Object.assign(arikaim,{ component: new HtmlComponent() });
+Object.assign(arikaim,{ component: new HtmlComponents() });
 
 $(document).ready(function() {
-    arikaim.page.initPageLoader();
+    arikaim.page.init();
 });
