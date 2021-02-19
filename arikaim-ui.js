@@ -10,6 +10,12 @@ if (typeof arikaim !== 'object') {
     throw new Error('Arikaim library not loaded!');   
 }
 
+if (typeof(window.jQuery) == true) {  
+    console.log('Error: jQuery library missing.');
+} 
+
+console.log('JQuery ' + $().jquery);
+
 function isEmptyElement(selector) {
     if (isEmpty(selector) == true) {
         return true;
@@ -814,12 +820,23 @@ function Page() {
         this.loader = loaderHtml;
     };
 
+    this.getPageComponents = function() {
+        var components = [];
+        $('.component-file').each(function(index, item) {
+            var componentName = $(item).attr('component-name');
+            if (isEmpty(componentName) == false) {
+                components.push(componentName); 
+            }          
+        });
+        
+        return components;
+    };
+
     this.init = function() {
-        var code = $('.loader-code').html();
-        if (isEmpty(code) == false) {
-            this.loader = code;
-        }
         console.log('Arikaim UI version ' + arikaim.ui.getVersion());
+        var components = this.getPageComponents();
+
+        arikaim.component.dispatchLoadedEvent(components,{});
     };
 
     this.getLoader = function(code) {     
@@ -1048,10 +1065,10 @@ function HtmlComponents() {
         onReady = callback;
     };
 
-    this.onLoaded = function(callback, name) {
-        $(document).ready(callback);
-        name = (isEmpty(name) == true) ? this.getCurrentComponent() : name;
-          
+    this.onLoaded = function(callback, name) {       
+        $(window).on('load',callback);
+
+        name = (isEmpty(name) == true) ? this.getCurrentComponent() : name;          
         if (isEmpty(name) == false) {
             this.loadedListeners[name] = callback;
         }
@@ -1203,6 +1220,6 @@ Object.assign(arikaim,{ ui: new ArikaimUI() });
 Object.assign(arikaim,{ page: new Page() });
 Object.assign(arikaim,{ component: new HtmlComponents() });
 
-$(document).ready(function() {
+$(window).on('load',function() {
     arikaim.page.init();
 });
