@@ -823,9 +823,13 @@ function Page() {
     this.getPageComponents = function() {
         var components = [];
         $('.component-file').each(function(index, item) {
-            var componentName = $(item).attr('component-name');
-            if (isEmpty(componentName) == false) {
-                components.push(componentName); 
+            var name = $(item).attr('component-name');
+            var type = $(item).attr('component-type');
+            if (isEmpty(name) == false) {
+                components.push({
+                    name: name,
+                    type: type
+                }); 
             }          
         });
         
@@ -1057,6 +1061,40 @@ function HtmlComponents() {
         this.loadedListeners = [];
     };
 
+    this.createComponentId = function(name) {
+        var pos = name.indexOf(':');
+        if (pos > -1) {
+            name = name.substr(pos + 1);
+        }
+        pos = name.indexOf('>');
+        if (pos > -1) {
+            name = name.substr(pos + 1);
+        }
+        pos = name.indexOf('::');
+        if (pos > -1) {
+            name = name.substr(pos + 1);
+        }
+
+        name = name.replace('~','-');
+      
+        return name;
+    };
+
+    this.registerVueComponent = function(name, data) {
+
+        if (isDefined('Vue') == false) {
+            console.error('Vue library not loaed!');
+            return false;
+        }
+        // register vue component
+        var componentName = self.createComponentId(name);             
+        if (isEmpty(data.template) == true) {
+            data.template = '#' + componentName + '-template';
+        }    
+
+        Vue.component(componentName,data);
+    };
+
     this.getCurrentComponent = function() {
         return window['arikaimComponentName'];
     };
@@ -1068,7 +1106,8 @@ function HtmlComponents() {
     this.onLoaded = function(callback, name) {       
         $(window).on('load',callback);
 
-        name = (isEmpty(name) == true) ? this.getCurrentComponent() : name;          
+        name = (isEmpty(name) == true) ? this.getCurrentComponent() : name; 
+         
         if (isEmpty(name) == false) {
             this.loadedListeners[name] = callback;
         }
@@ -1077,16 +1116,22 @@ function HtmlComponents() {
     this.dispatchLoadedEvent = function(components, params, onSuccess) {
         var component = new Component(params)
 
-        components.forEach(function(name) {
+        components.forEach(function(item) {
+            var name = getValue('name',item,item);
+            var type = getValue('type',item,'arikaim');
+
             window['arikaimComponentName'] = name;
             
-            callFunction(self.loadedListeners[name],component);
+            var data = callFunction(self.loadedListeners[name],component);
+
+            if (type == 'vue') {
+                // register vue component
+                self.registerVueComponent(name,data);               
+            }
+
+            arikaim.log('Component loaded: ' + name + ' type: ' + type);
         });
         
-        if (components.length > 0) {
-            arikaim.log('components loaded ' + components); 
-        }
-      
         callFunction(onSuccess,component);
         callFunction(onReady,components);
     };
