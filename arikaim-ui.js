@@ -115,6 +115,11 @@ function Text() {
              .replace(/"/g, "&quot;")
              .replace(/'/g, "&#039;");
     };
+
+    this.htmlDecode = function(text) {
+        var doc = new DOMParser().parseFromString(text,'text/html');
+        return doc.documentElement.textContent;
+    };
 }
 
 /**
@@ -258,7 +263,6 @@ function Form() {
     };
 
     this.onSubmit = function(selector, action, onSuccess, onError, submitButton) {
-        var deferred = new $.Deferred();
         if (isEmpty(submitButton) == true) {
             var submitButton = this.findSubmitButton(selector);
         }
@@ -282,37 +286,38 @@ function Form() {
                 arikaim.ui.enableButton(submitButton);   
                 self.enable(selector);  
                 self.showValidationErrors(selector);
-                deferred.reject();  
                 callFunction(onError);               
             } else {
                 // form is valid
                 var actionResult = callFunction(action,data);
              
-                if (isPromise(actionResult) == true) {                   
-                    actionResult.done(function(result) {
+                if (isPromise(actionResult) == true) {                      
+                    actionResult.then(function(result) {
                         arikaim.ui.enableButton(submitButton);                        
                         self.enable(selector); 
                         callFunction(onSuccess,result);
-                        deferred.resolve(result); 
-                    }).fail(function(errors) { 
+                    }).catch(function(errors) {                          
+                        if (isObject(errors) == true && isArray(errors) == false) {
+                            errors = '';                         
+                        }
                         arikaim.ui.enableButton(submitButton);                          
                         self.enable(selector);                     
                         self.addFieldErrors(selector,errors);
                         self.showErrors(errors);
-                        deferred.reject(errors); 
                         callFunction(onError,errors); 
                     });
                 } else {
-                    arikaim.ui.enableButton(submitButton);                      
-                    if (actionResult === true) {
-                        deferred.resolve(data);  
+                    if (actionResult === false) {
+                        arikaim.ui.enableButton(submitButton);    
+                        callFunction(onError,data);
+                    }                                    
+                    if (actionResult === true || isEmpty(actionResult) == true) {
+                        arikaim.ui.enableButton(submitButton);    
                         callFunction(onSuccess,data);
                     }
                 }
             }
         });
-     
-        return deferred.promise();
     };
 
     this.toObject = function(array) {        
@@ -331,6 +336,7 @@ function Form() {
         if (isArray(errors) == false) {
             return false;
         }
+    
         errors.forEach(function(error) {
             $(selector).form('add prompt',error.field_name,error.message);
         });
@@ -510,14 +516,18 @@ function Form() {
                 }
             }
         } else {
-            message = '<li>' + errors + '</li>';           
+            if (isEmpty(errors) == false) {
+                message = '<li>' + errors + '</li>';      
+            }                
         }
       
-        this.showMessage({
-            selector: selector,
-            message: message,
-            hide: 0
-        });        
+        if (isEmpty(message) == false) {
+            this.showMessage({
+                selector: selector,
+                message: message,
+                hide: 0
+            });        
+        }
     };   
 }
 
@@ -527,7 +537,7 @@ function Form() {
  */
 function ArikaimUI() {
     var self = this;
-    var version = '1.3.0';
+    var version = '1.3.3';
 
     this.form = new Form();
     this.template = new TemplateEngine();
@@ -629,6 +639,19 @@ function ArikaimUI() {
             }
         });
     };
+
+    this.loadImage = function(url, onSuccess, onError) {
+        var image = new Image();
+        image.onload = function(image) {
+            callFunction(onSuccess,image);
+        };
+        image.onerror = function(image) {
+            callFunction(onError,image);
+        };
+        image.src = url;
+        
+        return image;
+    };  
 
     this.viewPasswordButton = function(selector, fieldSelector, toggleClass) {
         toggleClass = getDefaultValue(toggleClass,'slash');
