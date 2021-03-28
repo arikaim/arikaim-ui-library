@@ -918,19 +918,6 @@ function Page() {
         $(element).replaceWith(content);
     };
     
-    this.loadProperties = function(name, onSuccess, onError) {
-        name = getDefaultValue(name,'');  
-        arikaim.log('Load page properties: ' + name);
-        arikaim.get('/core/api/ui/page/properties/' + name,function(result) {          
-            self.setProperties(result.properties);                                
-            arikaim.log('Page properties loaded!');
-            callFunction(onSuccess,result);
-        },function(errors) {
-            arikaim.log('Error loading page properties: ' + name);
-            callFunction(onError,errors);
-        });
-    };
-
     this.loadContent = function(params, onSuccess, onError) {     
         var componentName = getValue('component',params,'no-name');       
         var componentParams = getValue('params',params,'');
@@ -1015,17 +1002,6 @@ function Page() {
         } else {
             $(element).append('<li>' + errors + '</li>');
         }
-    };
-
-    this.loadPage = function(name, onSuccess, onError) {    
-        this.log('Load page: ' + name);
-        this.get('/core/api/ui/page/' + name,function(result) {
-            arikiam.log('Page ' + name + ' loaded!'); 
-            callFunction(onSuccess,result);     
-        }, function(errors) {
-            arikiam.log('Error loading page: ' + name);
-            callFunction(onError,errors);       
-        });        
     };
 } 
 
