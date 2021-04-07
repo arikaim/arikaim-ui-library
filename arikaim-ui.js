@@ -252,7 +252,6 @@ function Form() {
     };
 
     this.replaceValue = function(formData, fieldName, fieldValue) {
-
         formData.forEach(function(item,index) {
             if (item.name == fieldName) {
                 formData[index].value = fieldValue
@@ -325,7 +324,7 @@ function Form() {
         if (isArray(array) == false) {
             return result;
         }
-        for (var i = 0; i < array.length; i++){
+        for (var i = 0; i < array.length; i++) {
             result[array[i]['name']] = array[i]['value'];
         }
 
@@ -442,17 +441,19 @@ function Form() {
 
     this.validate = function(selector) {
         $(selector).form('validate form');
+
         return $(selector).form('is valid');
     };
 
     this.showValidationErrors = function(selector) {      
         var fields = $(selector).form('get dirty fields');
-        
-        fields.each(function(index, field)  {
+    
+        fields.each(function(index, field)  {             
             $(selector).form('validate field',field.name);
         });
       
-        var message = $(selector).find('.errors.message');
+        message = $(selector).find('.errors.message');
+
         if (isObject(message) == true) {
             arikaim.ui.show(message);
         }
@@ -499,7 +500,7 @@ function Form() {
         if (isEmpty(selector) == true) {
             selector = $('form').find('.errors');
         }       
-        var message = ''; 
+        var message = '<ul>'; 
         if (isArray(errors) == true) {
             for (var index = 0; index < errors.length; index++) {
                 var error = errors[index];
@@ -520,7 +521,8 @@ function Form() {
                 message = '<li>' + errors + '</li>';      
             }                
         }
-      
+        message += '</ul>';
+
         if (isEmpty(message) == false) {
             this.showMessage({
                 selector: selector,
@@ -537,7 +539,7 @@ function Form() {
  */
 function ArikaimUI() {
     var self = this;
-    var version = '1.3.3';
+    var version = '1.3.5';
 
     this.form = new Form();
     this.template = new TemplateEngine();
@@ -815,16 +817,14 @@ function ArikaimUI() {
 }
 
 /**
- *  @class Page
- *  
+ * 
+ *  @class Page 
  */
 function Page() {
     var self = this;
     var properties = {};  
-    var name = null;
     var defaultLoader = '<div class="ui active blue centered loader" id="loader"></div>';  
-    var language = null;
-
+   
     this.loader = '';
 
     this.toastMessage = function(message) {
@@ -839,8 +839,8 @@ function Page() {
         $('body').toast(message);
     };
 
-    this.setLoader = function(loaderHtml) {
-        this.loader = loaderHtml;
+    this.setLoader = function(code) {
+        this.loader = code;
     };
 
     this.getPageComponents = function() {
@@ -878,20 +878,12 @@ function Page() {
         location.reload();
     };
 
-    this.getPageName = function() {
-        return name;
-    };
-
     this.hasLib = function(libraryName) {
         return (properties.library.indexOf(libraryName) > 0) ? true : false;           
     };
 
     this.setProperties = function(params) {            
-        name = params.name;
         properties = params; 
-        language = params.language;
-
-        return true;
     };
 
     this.removeLoader = function(selector) {
