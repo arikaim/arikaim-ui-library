@@ -539,7 +539,7 @@ function Form() {
  */
 function ArikaimUI() {
     var self = this;
-    var version = '1.3.5';
+    var version = '1.3.6';
 
     this.form = new Form();
     this.template = new TemplateEngine();
@@ -939,23 +939,14 @@ function Page() {
         arikaim.component.load(componentName,function(result) { 
             self.removeLoader(); 
             if (append == true) {              
-                $(element).append(result.html);    
-                // dispatch load components
-                arikaim.component.dispatchLoadedEvent(result.components,result,onSuccess);          
-                callFunction(onSuccess,result);    
-                return;
+                $(element).append(result.html);                   
+            } else if (replace == true) {
+                $(element).replaceWith(result.html);               
+            } else {
+                arikaim.page.setContent(element,result.html);   
             }          
-            if (replace == true) {
-                $(element).replaceWith(result.html);
-                // dispatch load components
-                arikaim.component.dispatchLoadedEvent(result.components,result,onSuccess);  
-                callFunction(onSuccess,result);       
-                return;
-            }
-            arikaim.page.setContent(element,result.html);    
             // dispatch load components
             arikaim.component.dispatchLoadedEvent(result.components,result,onSuccess);       
-            callFunction(onSuccess,result);  
 
         },function(errors,options) {
             // errors load component
