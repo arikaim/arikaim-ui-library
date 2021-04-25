@@ -295,10 +295,11 @@ function Form() {
                         arikaim.ui.enableButton(submitButton);                        
                         self.enable(selector); 
                         callFunction(onSuccess,result);
-                    }).catch(function(errors) {                          
+                    }).catch(function(errors) {                                          
                         if (isObject(errors) == true && isArray(errors) == false) {
                             errors = '';                         
                         }
+
                         arikaim.ui.enableButton(submitButton);                          
                         self.enable(selector);                     
                         self.addFieldErrors(selector,errors);
@@ -539,7 +540,7 @@ function Form() {
  */
 function ArikaimUI() {
     var self = this;
-    var version = '1.3.6';
+    var version = '1.3.7';
 
     this.form = new Form();
     this.template = new TemplateEngine();
