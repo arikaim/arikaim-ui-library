@@ -1102,10 +1102,9 @@ function HtmlComponents() {
         components.forEach(function(item) {
             var name = getValue('name',item,item);
             var type = getValue('type',item,'arikaim');
-
             window['arikaimComponentName'] = name;
             
-            var data = callFunction(self.loadedListeners[name],component);
+            var data = callFunction(self.loadedListeners[name],name);
 
             if (type == 'vue') {
                 // register vue component
@@ -1185,7 +1184,7 @@ function HtmlComponents() {
                 return;
             }
             if (self.loadedScripts.indexOf(files[i].url) !== -1) {
-                // script is loaded load next
+                // script is loaded load next               
                 loadScript(i + 1);
                 return;
             }
