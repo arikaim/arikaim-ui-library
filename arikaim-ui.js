@@ -303,7 +303,11 @@ function Form() {
                         arikaim.ui.enableButton(submitButton);                          
                         self.enable(selector);                     
                         self.addFieldErrors(selector,errors);
-                        self.showErrors(errors);
+                        
+                        if (isEmpty(errors) == false) {
+                            self.showErrors(errors);
+                        }
+                      
                         callFunction(onError,errors); 
                     });
                 } else {
