@@ -457,7 +457,7 @@ function Form() {
             $(selector).form('validate field',field.name);
         });
       
-        message = $(selector).find('.errors.message');
+        var message = $(selector).find('.errors.message');
 
         if (isObject(message) == true) {
             arikaim.ui.show(message);
