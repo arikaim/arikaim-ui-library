@@ -2,28 +2,23 @@
     "title": "Arikaim UI",
     "name": "arikaim-ui",
     "package-type": "library",
-    "version": "1.3.10",
+    "version": "1.4.0",
     "description": "Arikaim UI library",
     "repository": "https://github.com/arikaim/arikaim-ui-library.git",
     "files": [
-        "arikaim-ui-1.3.10.min.js"
+        "arikaim-ui-1.4.0.min.js"
     ],
     "versions": {  
-        "cdn-1.3.9": {
-            "files": [
-                "https://cdn.jsdelivr.net/gh/arikaim-repository/arikaim-ui-library@1.3.9/arikaim-ui-1.3.9.min.js"   
-            ]
-        }, 
         "cdn": {
             "files": [
-                "https://cdn.jsdelivr.net/gh/arikaim-repository/arikaim-ui-library@1.3.10/arikaim-ui-1.3.10.min.js"   
+                "https://cdn.jsdelivr.net/gh/arikaim-repository/arikaim-ui-library@1.4.0/arikaim-ui-1.4.0.min.js"   
             ]
         }, 
-        "1.3.9": {
+        "1.3.10": {
             "files": [
-                "arikaim-ui-1.3.9.min.js"   
+                "arikaim-ui-1.3.10.min.js"
             ]
-        },     
+        },       
         "source": {
             "files": [
                 "arikaim-ui.js"   
