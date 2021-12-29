@@ -534,7 +534,7 @@ function Form() {
  */
 function ArikaimUI() {
     var self = this;
-    var version = '1.4.0';
+    var version = '1.4.1';
 
     this.form = new Form();
     this.template = new TemplateEngine();
@@ -547,6 +547,10 @@ function ArikaimUI() {
     this.loadComponent = function(params, onSuccess, onError) {
         return arikaim.page.loadContent(params, onSuccess, onError);
     };
+
+    this.subscribe = function(componentId, variableName, callback) {
+        return arikaim.component.subscribe(componentId,variableName,callback);
+    }
 
     this.loadLibrary = function(name, onSuccess, onError) {
         return arikaim.component.loadLibrary(name,onSuccess,onError);
@@ -1107,7 +1111,7 @@ function ArikaimComponent(id, name, type, parentId, props) {
         }
        
         // emit event 
-        arikaim.component.events.emit(getEventName(this.getId(),name),value);       
+        arikaim.component.emitEvent(this.getId(),name,value);         
     }
 
     this.html = function(html) {
@@ -1129,7 +1133,7 @@ function ArikaimComponent(id, name, type, parentId, props) {
     this.setVar = function(name, value) {
         vars[name] = value;
         // emit event 
-        arikaim.component.events.emit(getEventName(this.getId(),name),value);
+        arikaim.component.emitEvent(this.getId(),name,value);
     };
 
     this.on = function(name,callback) {
@@ -1150,23 +1154,13 @@ function ArikaimComponent(id, name, type, parentId, props) {
         $(element).off(name,callback);
     }
 
-    this.subscribe = function(componentId, name, callback) {
-        if (isFunction(callback) == false) {
-            return false;
-        }
-        var eventName = getEventName(componentId,name);
-        var subscriberName = getSubscriberName(this.getId(),name);
-        // add listener
-        arikaim.component.events.addListener(eventName,callback,subscriberName);
+    this.onChange = function(variableName, callback) {
+        this.subscribe(this.getId(),variableName,callback);
     };
 
-    function getEventName(componentId, name) {       
-        return 'ui-component:' + componentId + ':' + name;
-    }
-
-    function getSubscriberName(componentId, name) {       
-        return 'ui-component-subscriber-' + componentId + '-' + name;
-    }
+    this.subscribe = function(componentId, name, callback) {
+        arikaim.component.subscribe(componentId,name,callback,this.getId());        
+    };
 }
 
 /**
@@ -1180,6 +1174,35 @@ function HtmlComponents() {
     this.componentsList = [];
     this.loadedScripts = [];
     this.loadedListeners = [];
+
+
+    this.emitEvent = function(componentId, variableName, value) {
+        this.events.emit(getEventName(componentId,variableName),value);
+    };
+
+    this.subscribe = function(componentId, variableName, callback, subscriberId) {
+        if (isFunction(callback) == false) {
+            return false;
+        }
+        if (isObject(componentId) == true) {
+            componentId = componentId.getId();
+        }
+        
+        subscriberId = (isEmpty(subscriberId) == true) ? componentId : subscriberId;
+        var eventName = getEventName(componentId,variableName);
+        var subscriberName = getSubscriberName(subscriberId,variableName);
+
+        // add listener
+        this.events.addListener(eventName,callback,subscriberName);
+    };
+
+    function getEventName(componentId, name) {       
+        return 'ui-component:' + componentId + ':' + name;
+    }
+
+    function getSubscriberName(componentId, name) {       
+        return 'ui-component-subscriber-' + componentId + '-' + name;
+    }
 
     this.clear = function() {
         this.loadedScripts = [];
