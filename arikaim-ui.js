@@ -534,7 +534,7 @@ function Form() {
  */
 function ArikaimUI() {
     var self = this;
-    var version = '1.4.1';
+    var version = '1.4.2';
 
     this.form = new Form();
     this.template = new TemplateEngine();
@@ -877,11 +877,39 @@ function Page() {
         return components;
     };
 
+    this.initComponentInstances = function() {
+        var components = [];
+        $('.component-instance').each(function(index, item) {
+            var name = $(item).attr('component-name');
+            var id = $(item).attr('component-id');
+            var type = $(item).attr('component-type');
+
+            // init onLoaded callback
+            var component = arikaim.component.create(id,name,type);  
+            var callback = arikaim.component.getLoadedListener(name);
+
+            arikaim.component.setLoadedListener(id,callback);
+
+            if (isObject(component) == true) {
+                components.push({
+                    name: name,
+                    id: id,
+                    type: type
+                }); 
+            }    
+            callFunction(callback,component);            
+                      
+            arikaim.log('Component instance:' + component.getName() + ' type:' + component.getType() + ' id:' + component.getId());
+        });
+        
+    };
+
     this.init = function() {
         console.log('Arikaim UI version ' + arikaim.ui.getVersion());
         var components = this.getPageComponents();
- 
         arikaim.component.dispatchLoadedEvent(components,{});
+
+        this.initComponentInstances();
     };
 
     this.getLoader = function(code) {     
@@ -1270,13 +1298,19 @@ function HtmlComponents() {
         return (isObject(window['arikaimComponent']) == true) ? window['arikaimComponent'] : this.create();
     };
 
-    this.onLoaded = function(callback, component) {       
-        component = (isEmpty(component) == true) ? this.getCurrentComponent() : component; 
-        var name = component.getName();
-        var id = component.getId();
+    this.getLoadedListener = function(key) {
+        return this.loadedListeners[key];
+    };
 
-        if (isEmpty(name) == false && isFunction(callback) == true) {          
-            this.loadedListeners[name] = callback;                  
+    this.setLoadedListener = function(key, callback) {
+        this.loadedListeners[key] = callback;
+    } 
+
+    this.onLoaded = function(callback, component) {       
+        component = (isEmpty(component) == true) ? this.getCurrentComponent() : component;        
+       
+        if (isEmpty(component.getName()) == false && isFunction(callback) == true) {          
+            this.loadedListeners[component.getName()] = callback;                  
         }
     };
 
@@ -1287,13 +1321,14 @@ function HtmlComponents() {
                 getValue('name',item,null),                
                 getValue('type',item,'arikaim')
             );
-            
-            if (isEmpty(component.getName()) == false) {
-                callFunction(self.loadedListeners[component.getName()],component);            
+        
+            var callback = self.loadedListeners[component.getId()];
+            if (isFunction(callback) == false) {
+                callback = self.loadedListeners[component.getName()]
             }
-            
-            self.add(component);
 
+            callFunction(callback,component);            
+                      
             arikaim.log('Component loaded:' + component.getName() + ' type:' + component.getType() + ' id:' + component.getId());
         });
         
