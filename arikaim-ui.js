@@ -534,7 +534,7 @@ function Form() {
  */
 function ArikaimUI() {
     var self = this;
-    var version = '1.4.2';
+    var version = '1.4.3';
 
     this.form = new Form();
     this.template = new TemplateEngine();
@@ -559,6 +559,15 @@ function ArikaimUI() {
     this.getComponent = function(id) {
         return arikaim.component.get(id);
     }
+
+    this.withComponent = function(id, callback) {
+        var component = this.getComponent(id);
+        if (isObject(component) == false) {
+            return false;
+        }
+
+        return callFunction(callback,component);
+    };
 
     this.getComponents = function() {
         return arikaim.component.getAll();
@@ -897,11 +906,14 @@ function Page() {
                     type: type
                 }); 
             }    
-            callFunction(callback,component);            
-                      
+
+            var result = callFunction(callback,component);            
+            component = (result instanceof ArikaimComponent) ? result : component;
+            // add component object         
+            arikaim.component.add(component);
+           
             arikaim.log('Component instance:' + component.getName() + ' type:' + component.getType() + ' id:' + component.getId());
-        });
-        
+        });        
     };
 
     this.init = function() {
@@ -1248,7 +1260,7 @@ function HtmlComponents() {
 
     this.get = function(id) {
         var component = this.componentsList[id];
-        return (isObject(component) == true) ? component : this.create(id);
+        return (isObject(component) == true) ? component : null;
     }
 
     this.add = function(component) {
@@ -1327,8 +1339,11 @@ function HtmlComponents() {
                 callback = self.loadedListeners[component.getName()]
             }
 
-            callFunction(callback,component);            
-                      
+            var result = callFunction(callback,component);            
+            component = (result instanceof ArikaimComponent) ? result : component;
+            // add component object         
+            self.add(component);
+
             arikaim.log('Component loaded:' + component.getName() + ' type:' + component.getType() + ' id:' + component.getId());
         });
         
