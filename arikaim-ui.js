@@ -534,7 +534,7 @@ function Form() {
  */
 function ArikaimUI() {
     var self = this;
-    var version = '1.4.3';
+    var version = '1.4.4';
 
     this.form = new Form();
     this.template = new TemplateEngine();
@@ -925,7 +925,15 @@ function Page() {
     };
 
     this.getLoader = function(code) {     
-        return ((isEmpty(code) == true) && (isEmpty(this.loader) == true)) ? defaultLoader : this.loader;      
+        if (isEmpty(code) == false) {
+            return code;
+        } 
+        if (isEmpty(this.loader) == false) {
+            return this.loader;
+        }
+        code = $('#loader-code').html();
+
+        return (isEmpty(code) == true) ? defaultLoader : code;            
     };
 
     this.reload = function() {
@@ -987,12 +995,13 @@ function Page() {
         if (isEmpty(elementId) == false) {
             element = '#' + elementId;
         }
-        var loader = this.getLoader(loaderCode);
+       
         if (isEmpty(loaderClass) == false) {
             $('#loader').attr('class',loaderClass);
         }
+
         if (append !== true && hideLoader !== true) {
-            this.showLoader(element,loader);
+            this.showLoader(element,loaderCode);
         }
 
         arikaim.component.load(componentName,function(result) { 
