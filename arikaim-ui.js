@@ -534,7 +534,7 @@ function Form() {
  */
 function ArikaimUI() {
     var self = this;
-    var version = '1.4.4';
+    var version = '1.4.5';
 
     this.form = new Form();
     this.template = new TemplateEngine();
@@ -740,16 +740,24 @@ function ArikaimUI() {
         $(selector).addClass('active');     
     };
 
-    this.enableButton = function(element) {       
+    this.enableButton = function(element, loaderIconSelector) {    
+        loaderIconSelector = getDefaultValue(loaderIconSelector,'.loader-icon');  
+        $(element).find(loaderIconSelector).hide();
+    
         $(element).removeClass('disabled loading');
+        $(element).removeAttr('disabled');
     };
+     
+    this.disableButton = function(element, loadingOnly, loaderIconSelector) {   
+        loaderIconSelector = getDefaultValue(loaderIconSelector,'.loader-icon'); 
+        $(element).find(loaderIconSelector).show();
 
-    this.disableButton = function(element, loadingOnly) {   
         loadingOnly = getDefaultValue(loadingOnly,false);
 
         if (loadingOnly == true) {
             $(element).addClass('loading');
         } else {          
+            $(element).attr("disabled", true);
             $(element).addClass('disabled loading');
         }            
     };
