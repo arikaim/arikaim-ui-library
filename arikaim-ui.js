@@ -1000,10 +1000,14 @@ function Page() {
         var includeFiles = getValue('includeFiles',params,true);
         var disableRedirect = getValue('disableRedirect',params,false);
        
-        if (isEmpty(elementId) == false) {
+        if (isObject(elementId) == true) {
+            element = elementId;
+        }
+        
+        if (isEmpty(elementId) == false && isObject(elementId) == false) {
             element = '#' + elementId;
         }
-       
+
         if (isEmpty(loaderClass) == false) {
             $('#loader').attr('class',loaderClass);
         }
