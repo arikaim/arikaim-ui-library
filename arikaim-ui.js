@@ -994,6 +994,7 @@ function Page() {
         var loaderClass = getValue('loaderClass',params,'');
         var replace = getValue('replace',params,false);
         var append = getValue('append',params,false);
+        var prepend = getValue('prepend',params,false);
         var hideLoader = getValue('hideLoader',params,false);
         var useHeader = getValue('useHeader',params,false);
         var method = getValue('method',params,'GET');
@@ -1021,7 +1022,9 @@ function Page() {
             if (append == true) {              
                 $(element).append(result.html);                   
             } else if (replace == true) {
-                $(element).replaceWith(result.html);               
+                $(element).replaceWith(result.html);      
+            } else if (prepend == true) {
+                $(element).prepend(result.html); 
             } else {
                 arikaim.page.setContent(element,result.html);   
             }          
