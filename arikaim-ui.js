@@ -534,7 +534,7 @@ function Form() {
  */
 function ArikaimUI() {
     var self = this;
-    var version = '1.4.5';
+    var version = '1.4.9';
 
     this.form = new Form();
     this.template = new TemplateEngine();
@@ -972,14 +972,6 @@ function Page() {
         }     
     };
 
-    this.setContent = function(element, content) {
-        $(element).html(content);
-    };
-
-    this.replaceContent = function(element, content) {
-        $(element).replaceWith(content);
-    };
-    
     this.loadContent = function(params, onSuccess, onError) {   
         // component name to load  
         var componentName = getValue('component',params,null);
@@ -1013,7 +1005,7 @@ function Page() {
             $('#loader').attr('class',loaderClass);
         }
 
-        if (append !== true && hideLoader !== true) {
+        if (append !== true && hideLoader !== true && prepend != true) {
             this.showLoader(element,loaderCode);
         }
 
@@ -1026,7 +1018,7 @@ function Page() {
             } else if (prepend == true) {
                 $(element).prepend(result.html); 
             } else {
-                arikaim.page.setContent(element,result.html);   
+                $(element).html(content);
             }          
            
             // dispatch load components
@@ -1054,7 +1046,7 @@ function Page() {
             element = '#' + elementId;
         }      
         arikaim.component.load('semantic~message.error',function(result) { 
-            arikaim.page.setContent(element,result.html); 
+            $(element).html(result.html);            
         },null,message);
     };
 
