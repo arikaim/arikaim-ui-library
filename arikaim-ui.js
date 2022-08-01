@@ -534,7 +534,7 @@ function Form() {
  */
 function ArikaimUI() {
     var self = this;
-    var version = '1.4.9';
+    var version = '1.4.10';
 
     this.form = new Form();
     this.template = new TemplateEngine();
@@ -1018,7 +1018,7 @@ function Page() {
             } else if (prepend == true) {
                 $(element).prepend(result.html); 
             } else {
-                $(element).html(content);
+                $(element).html(result.html);
             }          
            
             // dispatch load components
