@@ -987,6 +987,7 @@ function Page() {
         var replace = getValue('replace',params,false);
         var append = getValue('append',params,false);
         var prepend = getValue('prepend',params,false);
+        var focus = getValue('focus',params,false);
         var hideLoader = getValue('hideLoader',params,false);
         var useHeader = getValue('useHeader',params,false);
         var method = getValue('method',params,'GET');
@@ -1020,7 +1021,12 @@ function Page() {
             } else {
                 $(element).html(result.html);
             }          
-           
+            
+            if (focus == true) {
+                // set focus
+                $(element).attr('tabindex',0).focus();
+            }
+
             // dispatch load components
             arikaim.component.dispatchLoadedEvent(result.components,result,onSuccess); 
            
