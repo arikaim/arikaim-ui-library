@@ -534,7 +534,7 @@ function Form() {
  */
 function ArikaimUI() {
     var self = this;
-    var version = '1.4.12';
+    var version = '1.4.13';
 
     this.form = new Form();
     this.template = new TemplateEngine();
@@ -584,6 +584,20 @@ function ArikaimUI() {
     this.loadComponentButton = function(selector, onSuccess, onError) {
         this.button(selector,function(button) {
             var props = self.getAttributes(button);
+
+            if (isEmpty(props['params']) == false) {
+                var params = {};
+                var itemValue;
+                var items = props['params'].split(',');              
+                items.forEach(function(item) { 
+                    var param = item.split(':');
+                    itemValue = (param[1] === 'false') ? false : param[1];
+                    itemValue = (itemValue === 'true') ? true : itemValue;
+                    params[param[0]] = itemValue;
+                });
+                props['params'] = params;
+            }
+
             return self.loadComponent(props,onSuccess,onError);
         });
     };
