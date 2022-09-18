@@ -534,7 +534,7 @@ function Form() {
  */
 function ArikaimUI() {
     var self = this;
-    var version = '1.4.10';
+    var version = '1.4.12';
 
     this.form = new Form();
     this.template = new TemplateEngine();
@@ -543,6 +543,14 @@ function ArikaimUI() {
     this.getVersion = function() {
         return version;
     } 
+
+    this.getAttributes = function(element) {
+        var attrs = {};
+        $.each(element.attributes, function (index,attribute) {
+            attrs[attribute.name] = attribute.value ?? null;
+        });       
+        return attrs;
+    };
 
     this.loadComponent = function(params, onSuccess, onError) {
         return arikaim.page.loadContent(params, onSuccess, onError);
@@ -572,6 +580,13 @@ function ArikaimUI() {
     this.getComponents = function() {
         return arikaim.component.getAll();
     }
+
+    this.loadComponentButton = function(selector, onSuccess, onError) {
+        this.button(selector,function(button) {
+            var props = self.getAttributes(button);
+            return self.loadComponent(props,onSuccess,onError);
+        });
+    };
 
     this.button = function(selector, action, onSuccess, onError) {      
         $(selector).off();
@@ -978,7 +993,8 @@ function Page() {
         componentName = (isEmpty(componentName) == true) ? getValue('name',params,null) : componentName;                   
         // mount element id (parent element id)
         var elementId = getValue('id',params);
-        elementId = (isEmpty(elementId) == true) ? getValue('mountTo',params,null) : elementId;     
+        elementId = (isEmpty(elementId) == true) ? getValue('mountTo',params,null) : elementId;  
+        elementId = (isEmpty(elementId) == true) ? getValue('mountto',params,null) : elementId;     
         // options
         var componentParams = getValue('params',params,'');
         var element = getValue('element',params);
@@ -994,6 +1010,10 @@ function Page() {
         var includeFiles = getValue('includeFiles',params,true);
         var disableRedirect = getValue('disableRedirect',params,false);
        
+        replace = (replace === 'true') ? true : replace;
+        append = (append === 'true') ? true : append;
+        prepend = (prepend === 'true') ? true : prepend;
+
         if (isObject(elementId) == true) {
             element = elementId;
         }
@@ -1398,6 +1418,12 @@ function HtmlComponents() {
         return arikaim.apiCall('/core/api/ui/component/details/' + name,onSuccess,onError,params);      
     };
 
+    this.loadLibraryFiles = function(name, onSuccess, onError) {
+        arikaim.get('/core/api/ui/library/' + name,function(requestResult) { 
+            callFunction(onSuccess,requestResult);                      
+        },onError);
+    };
+
     this.loadLibrary = function(name, onSuccess, onError) {
         arikaim.get('/core/api/ui/library/' + name,function(requestResult) {           
             self.includeFiles(requestResult,function(result) {  
@@ -1504,6 +1530,7 @@ Object.assign(arikaim,{ page: new Page() });
 Object.assign(arikaim,{ component: new HtmlComponents() });
 Object.assign(arikaim,{ ui: new ArikaimUI() });
 
+// init
 $(window).on('load',function() {
     arikaim.page.init();
 });
