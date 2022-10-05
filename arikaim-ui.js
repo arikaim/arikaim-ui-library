@@ -534,7 +534,7 @@ function Form() {
  */
 function ArikaimUI() {
     var self = this;
-    var version = '1.4.13';
+    var version = '1.4.14';
 
     this.form = new Form();
     this.template = new TemplateEngine();
@@ -581,7 +581,7 @@ function ArikaimUI() {
         return arikaim.component.getAll();
     }
 
-    this.loadComponentButton = function(selector, onSuccess, onError) {
+    this.loadComponentButton = function(selector, action, onSuccess, onError) {
         this.button(selector,function(button) {
             var props = self.getAttributes(button);
 
@@ -597,6 +597,7 @@ function ArikaimUI() {
                 });
                 props['params'] = params;
             }
+            callFunction(action,button);
 
             return self.loadComponent(props,onSuccess,onError);
         });
@@ -1256,6 +1257,10 @@ function ArikaimComponent(id, name, type, parentId, props) {
 
     this.subscribe = function(componentId, name, callback) {
         arikaim.component.subscribe(componentId,name,callback,this.getId());        
+    };
+
+    this.remove = function() {
+        arikaim.component.remove(this.getId());   
     };
 }
 
