@@ -360,9 +360,11 @@ function Form() {
     
         $.each(fields,function(index,field) {
             var fieldName = $(field).attr('name');
-            if (isEmpty(rules.fields[fieldName]) == true) {
-                rules.fields[fieldName] = self.createRule(field);
-            }           
+            if (isEmpty(fieldName) == false) {
+                if (isEmpty(rules.fields[fieldName]) == true) {
+                    rules.fields[fieldName] = self.createRule(field);
+                }  
+            }                     
         });
       
         return rules;
@@ -373,11 +375,12 @@ function Form() {
         var ruleValue = $(field).attr('rule-value');
         var optional = $(field).attr('optional');
         var fieldId = $(field).attr('id');  
+        var name = $(field).attr('name');  
         var errorPrompt = $(field).attr('error-prompt');
         errorPrompt = (isEmpty(errorPrompt) == false) ? errorPrompt.split(',') : null;
            
         var result = {
-            identifier: fieldId
+            identifier: (isEmpty(fieldId) == true) ? name : fieldId
         };
         if (isEmpty(rule) == true) {
             result.optional = true;
@@ -431,6 +434,7 @@ function Form() {
                 }
             }
         };        
+
         $(selector).form(rules);
         $(selector + ' :input').on('focus',function() {        
             self.clearErrors(selector);
@@ -534,7 +538,7 @@ function Form() {
  */
 function ArikaimUI() {
     var self = this;
-    var version = '1.4.14';
+    var version = '1.4.15';
 
     this.form = new Form();
     this.template = new TemplateEngine();
@@ -1233,7 +1237,7 @@ function ArikaimComponent(id, name, type, parentId, props) {
         arikaim.component.emitEvent(this.getId(),name,value);
     };
 
-    this.on = function(name,callback) {
+    this.on = function(name, callback) {
         if (this.isValid() == false || isEmpty(name) == true) {
             return false;
         }
@@ -1242,7 +1246,7 @@ function ArikaimComponent(id, name, type, parentId, props) {
         $(element).on(name,callback);
     }
 
-    this.off = function(name,callback) {
+    this.off = function(name, callback) {
         if (this.isValid() == false || isEmpty(name) == true) {
             return false;
         }
@@ -1275,7 +1279,6 @@ function HtmlComponents() {
     this.componentsList = [];
     this.loadedScripts = [];
     this.loadedListeners = [];
-
 
     this.emitEvent = function(componentId, variableName, value) {
         this.events.emit(getEventName(componentId,variableName),value);
