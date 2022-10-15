@@ -11,7 +11,7 @@
     "versions": {  
         "cdn": {
             "files": [
-                "https://cdn.jsdelivr.net/gh/arikaim-repository/arikaim-ui-library@1.4.11/arikaim-ui-1.4.16.min.js"   
+                "https://cdn.jsdelivr.net/gh/arikaim-repository/arikaim-ui-library@1.4.16/arikaim-ui-1.4.16.min.js"   
             ]
         },    
         "source": {
