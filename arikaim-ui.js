@@ -199,6 +199,12 @@ function Form() {
         return (isEmpty($.fn.form.settings) == true) ? null : $.fn.form.settings;        
     };
 
+    this.onError = function(callback) {
+        if (isEmpty($.fn.form.settings) == false) {
+            $.fn.form.settings.onFailure = callback;
+        }
+    };
+
     this.clear = function(selector) {
         $(selector)[0].reset();
         $(selector).trigger('reset');
@@ -268,8 +274,7 @@ function Form() {
                 // prevent default form submit 
                 return false;
             }
-           
-            self.clearErrors(selector);          
+                 
             self.disable(selector);
             arikaim.ui.disableButton(submitButton);
             var data = self.serialize(selector);
@@ -366,7 +371,7 @@ function Form() {
                 }  
             }                     
         });
-      
+    
         return rules;
     };
 
@@ -436,9 +441,6 @@ function Form() {
         };        
 
         $(selector).form(rules);
-        $(selector + ' :input').on('focus',function() {        
-            self.clearErrors(selector);
-        });
     };
 
     this.validate = function(selector) {
@@ -447,15 +449,8 @@ function Form() {
         return $(selector).form('is valid');
     };
 
-    this.showValidationErrors = function(selector) {      
-        var fields = $(selector).form('get dirty fields');
-    
-        fields.each(function(index, field)  {             
-            $(selector).form('validate field',field.name);
-        });
-      
+    this.showValidationErrors = function(selector) {       
         var message = $(selector).find('.errors.message');
-
         if (isObject(message) == true) {
             arikaim.ui.show(message);
         }
@@ -490,7 +485,7 @@ function Form() {
         }       
     };
 
-    this.clearErrors = function(selector) {      
+    this.clearErrors = function(selector) {    
         $(selector).find('.errors.message').html('');
         $(selector).find('.errors').html('');    
         $(selector).find('.errors.list').remove();
@@ -538,7 +533,7 @@ function Form() {
  */
 function ArikaimUI() {
     var self = this;
-    var version = '1.4.15';
+    var version = '1.4.16';
 
     this.form = new Form();
     this.template = new TemplateEngine();
