@@ -533,7 +533,7 @@ function Form() {
  */
 function ArikaimUI() {
     var self = this;
-    var version = '1.4.16';
+    var version = '1.4.17';
 
     this.form = new Form();
     this.template = new TemplateEngine();
@@ -546,7 +546,7 @@ function ArikaimUI() {
     this.getAttributes = function(element) {
         var attrs = {};
         $.each(element.attributes, function (index,attribute) {
-            attrs[attribute.name] = attribute.value ?? null;
+            attrs[attribute.name] = (isEmpty(attribute.value) == true) ? null : attribute.value;
         });       
         return attrs;
     };
