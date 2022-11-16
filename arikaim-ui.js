@@ -340,7 +340,9 @@ function Form() {
         }
     
         errors.forEach(function(error) {
-            $(selector).form('add prompt',error.field_name,error.message);
+            if (isEmpty(error.field_name) == false) {
+                $(selector).form('add prompt',error.field_name,error.message);
+            }
         });
     };
     
