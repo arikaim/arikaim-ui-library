@@ -462,16 +462,14 @@ function Form() {
         if (isObject(options) == false) {
             options = { message: options };
         }
-        var selector = getValue('selector',options,null); 
+        var selector = getValue('selector',options,'form'); 
         var cssClass = getValue('class',options,null);   
         var removeClass = getValue('removeClass',options,'error');
-
-        if (isEmpty(selector) == true) {
-            selector = $('form').find('.success');
-        }
         var message = getValue('message',options,''); 
         var hide = getValue('hide',options,2000);  
 
+        selector = $(selector).find('.success.message');
+      
         if (cssClass != null) {
             $(selector).addClass(cssClass).removeClass(removeClass);
         }
@@ -535,7 +533,7 @@ function Form() {
  */
 function ArikaimUI() {
     var self = this;
-    var version = '1.4.19';
+    var version = '1.4.20';
 
     this.form = new Form();
     this.template = new TemplateEngine();
@@ -925,40 +923,36 @@ function Page() {
         return components;
     };
 
+    this.createComponentInstance = function(id, name, type) {
+        // init onLoaded callback
+        var component = arikaim.component.create(id,name,type);  
+        var callback = arikaim.component.getLoadedListener(name);
+
+        arikaim.component.setLoadedListener(id,callback);
+
+        var result = callFunction(callback,component);            
+        component = (result instanceof ArikaimComponent) ? result : component;
+         // add component object      
+        if (isObject(component) == true) {   
+            arikaim.component.add(component);
+        }
+
+        arikaim.log('Component instance:' + component.getName() + ' type:' + component.getType() + ' id:' + component.getId());
+    }
+
     this.initComponentInstances = function() {
-        var components = [];
         $('.component-instance').each(function(index, item) {
             var name = $(item).attr('component-name');
             var id = $(item).attr('component-id');
             var type = $(item).attr('component-type');
 
-            // init onLoaded callback
-            var component = arikaim.component.create(id,name,type);  
-            var callback = arikaim.component.getLoadedListener(name);
-
-            arikaim.component.setLoadedListener(id,callback);
-
-            if (isObject(component) == true) {
-                components.push({
-                    name: name,
-                    id: id,
-                    type: type
-                }); 
-            }    
-
-            var result = callFunction(callback,component);            
-            component = (result instanceof ArikaimComponent) ? result : component;
-            // add component object         
-            arikaim.component.add(component);
-           
-            arikaim.log('Component instance:' + component.getName() + ' type:' + component.getType() + ' id:' + component.getId());
+            self.createComponentInstance(id,name,type);
         });        
     };
 
     this.init = function() {
-        console.log('Arikaim UI version ' + arikaim.ui.getVersion());
-        var components = this.getPageComponents();
-        arikaim.component.dispatchLoadedEvent(components,{});
+        console.log('Arikaim UI version ' + arikaim.ui.getVersion());      
+        arikaim.component.dispatchLoadedEvent(this.getPageComponents(),{});
 
         this.initComponentInstances();
     };
@@ -1406,11 +1400,15 @@ function HtmlComponents() {
             );
         
             var callback = self.loadedListeners[component.getId()];
+            if (isEmpty(callback) == true) {
+                callback = self.loadedListeners[item.name];
+            }
+
             if (isFunction(callback) == false) {
                 callback = self.loadedListeners[component.getName()]
             }
 
-            var result = callFunction(callback,component);            
+            var result = callFunction(callback,component);    
             component = (result instanceof ArikaimComponent) ? result : component;
             // add component object         
             self.add(component);
@@ -1524,13 +1522,11 @@ function HtmlComponents() {
     };
 
     this.includeFiles = function(response, onSuccess, onError) {
-        var jsFiles  = response.js;
-        var cssFiles = response.css;
         var loadedFiles = 0;
 
         // load css files
-        if (cssFiles.length > 0) {           
-            cssFiles.forEach(function(file) {       
+        if (response.css.length > 0) {           
+            response.css.forEach(function(file) {       
                 if (self.loadedScripts.indexOf(file.url) !== -1) {
                     return true;
                 }
@@ -1540,7 +1536,7 @@ function HtmlComponents() {
         }
         
         // load js files
-        var files = Object.values(jsFiles);
+        var files = Object.values(response.js);
         if (files.length == 0) {
             callFunction(onSuccess,loadedFiles);
             return;
