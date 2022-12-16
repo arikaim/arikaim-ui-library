@@ -274,7 +274,8 @@ function Form() {
                 // prevent default form submit 
                 return false;
             }
-                 
+             
+            self.clearErrors(selector);
             self.disable(selector);
             arikaim.ui.disableButton(submitButton);
             var data = self.serialize(selector);
@@ -466,10 +467,15 @@ function Form() {
         var cssClass = getValue('class',options,null);   
         var removeClass = getValue('removeClass',options,'error');
         var message = getValue('message',options,''); 
+        var error = getValue('error',options,false); 
         var hide = getValue('hide',options,2000);  
 
-        selector = $(selector).find('.success.message');
-      
+        if (error == true) {
+            selector = $(selector).find('.error.message');
+        } else {
+            selector = $(selector).find('.success.message');
+        }
+       
         if (cssClass != null) {
             $(selector).addClass(cssClass).removeClass(removeClass);
         }
@@ -495,7 +501,7 @@ function Form() {
 
     this.showErrors = function(errors, selector, component) {
         if (isEmpty(selector) == true) {
-            selector = $('form').find('.errors');
+            selector = 'form';
         }       
         var message = '<ul>'; 
         if (isArray(errors) == true) {
@@ -521,6 +527,7 @@ function Form() {
             this.showMessage({
                 selector: selector,
                 message: message,
+                error: true,
                 hide: 0
             });        
         }
@@ -533,7 +540,7 @@ function Form() {
  */
 function ArikaimUI() {
     var self = this;
-    var version = '1.4.20';
+    var version = '1.4.21';
 
     this.form = new Form();
     this.template = new TemplateEngine();
