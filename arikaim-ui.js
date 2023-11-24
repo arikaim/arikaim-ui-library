@@ -540,7 +540,7 @@ function Form() {
  */
 function ArikaimUI() {
     var self = this;
-    var version = '1.4.21';
+    var version = '1.4.23';
 
     this.form = new Form();
     this.template = new TemplateEngine();
@@ -1168,15 +1168,15 @@ function ArikaimComponent(id, name, type, parentId, props) {
     var parent = (isEmpty(parentId) == true) ? null : document.getElementById(parentId);
 
     this.reload = function(onSuccess) { 
-        if (isEmpty(component.getParentId()) == true) {
+        if (isEmpty(this.getParentId()) == true) {
             console.error('Parent node id is empty');
             return;
         }
 
         return arikaim.ui.loadComponent({
-            mountTo: component.getParentId(),
-            component: component.getName(),
-            params: arikaim.ui.getAttributes(component.getElement())
+            mountTo: this.getParentId(),
+            component: this.getName(),
+            params: arikaim.ui.getAttributes(this.getElement())
         },function(result) {
             callFunction(onSuccess,result);
         });
