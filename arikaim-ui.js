@@ -1167,6 +1167,21 @@ function ArikaimComponent(id, name, type, parentId, props) {
     var parentId = getDefaultValue(parentId,(isObject(element) == true) ? element.parentNode.id : null);
     var parent = (isEmpty(parentId) == true) ? null : document.getElementById(parentId);
 
+    this.reload = function(onSuccess) { 
+        if (isEmpty(component.getParentId()) == true) {
+            console.error('Parent node id is empty');
+            return;
+        }
+
+        return arikaim.ui.loadComponent({
+            mountTo: component.getParentId(),
+            component: component.getName(),
+            params: arikaim.ui.getAttributes(component.getElement())
+        },function(result) {
+            callFunction(onSuccess,result);
+        });
+    };
+
     this.hasParent = function() { 
         return (parent instanceof Element) ? true : false;         
     };
