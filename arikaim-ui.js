@@ -702,6 +702,25 @@ function ArikaimUI() {
         });
     };
 
+    this.preloadImages = function(onLoaded, selector, dataAttr) {
+        if (isEmpty(selector) == true) {
+            selector = 'img'
+        }
+        if (isEmpty(dataAttr) == true) {
+            dataAttr = 'data-src'
+        }
+
+        $(selector).each(function(index,element) {
+            var url = $(element).attr(dataAttr);
+            if (isEmpty(url) == false) {
+                self.loadImage(url,function() {
+                    $(element).attr('src',url);   
+                    callFunction(onLoaded,element);           
+                });          
+            }
+        });
+    };
+
     this.loadImage = function(url, onSuccess, onError) {
         var image = new Image();
         image.onload = function(image) {
