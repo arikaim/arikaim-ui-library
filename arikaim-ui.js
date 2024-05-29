@@ -540,7 +540,7 @@ function Form() {
  */
 function ArikaimUI() {
     var self = this;
-    var version = '1.4.24';
+    var version = '1.4.26';
 
     this.form = new Form();
     this.template = new TemplateEngine();
@@ -552,12 +552,19 @@ function ArikaimUI() {
 
     this.getAttributes = function(element) {
         var attrs = {};
+        if (isObject(element) == false) {
+            return attrs;
+        }
+
+        element = $(element)[0];
+        
         $.each(element.attributes, function (index,attribute) {
             attrs[attribute.name] = (isEmpty(attribute.value) == true) ? null : attribute.value;
         });       
+
         return attrs;
     };
-
+  
     this.loadComponent = function(params, onSuccess, onError) {
         return arikaim.page.loadContent(params, onSuccess, onError);
     };
