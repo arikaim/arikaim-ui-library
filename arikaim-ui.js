@@ -540,7 +540,7 @@ function Form() {
  */
 function ArikaimUI() {
     var self = this;
-    var version = '1.4.26';
+    var version = '1.4.27';
 
     this.form = new Form();
     this.template = new TemplateEngine();
@@ -1117,8 +1117,11 @@ function Page() {
             if (disableRedirect == false && isEmpty(options.redirect) == false) {
                 // redirect to error or login page
                 arikaim.loadUrl(options.redirect,true);
-            } 
-          
+            } else {
+                if (options.reload == true) {
+                    location.reload(); 
+                }
+            }
             callFunction(onError,errors,null,options);   
         },componentParams,useHeader,includeFiles,method);
     };
