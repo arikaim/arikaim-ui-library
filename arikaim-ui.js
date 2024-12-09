@@ -540,7 +540,7 @@ function Form() {
  */
 function ArikaimUI() {
     var self = this;
-    var version = '1.4.27';
+    var version = '1.4.28';
 
     this.form = new Form();
     this.template = new TemplateEngine();
@@ -594,21 +594,26 @@ function ArikaimUI() {
         return arikaim.component.getAll();
     }
 
+    this.parseComponentParams = function(props) {
+        var params = {};
+        var itemValue;
+        var items = props.split(',');              
+        items.forEach(function(item) { 
+            var param = item.split(':');
+            itemValue = (param[1] === 'false') ? false : param[1];
+            itemValue = (itemValue === 'true') ? true : itemValue;
+            params[param[0]] = itemValue;
+        });
+
+        return params;
+    }
+
     this.loadComponentButton = function(selector, action, onSuccess, onError) {
         this.button(selector,function(button) {
             var props = self.getAttributes(button);
 
-            if (isEmpty(props['params']) == false) {
-                var params = {};
-                var itemValue;
-                var items = props['params'].split(',');              
-                items.forEach(function(item) { 
-                    var param = item.split(':');
-                    itemValue = (param[1] === 'false') ? false : param[1];
-                    itemValue = (itemValue === 'true') ? true : itemValue;
-                    params[param[0]] = itemValue;
-                });
-                props['params'] = params;
+            if (isEmpty(props['params']) == false) { 
+                props['params'] = this.parseComponentParams(props['params']);
             }
             callFunction(action,button);
 
@@ -1049,7 +1054,10 @@ function Page() {
         elementId = (isEmpty(elementId) == true) ? getValue('mountTo',params,null) : elementId;  
         elementId = (isEmpty(elementId) == true) ? getValue('mountto',params,null) : elementId;     
         // options
-        var componentParams = getValue('params',params,'');
+        var componentParams = getValue('params',params,null);
+        if (isString(componentParams) == true) {
+            componentParams = arikaim.ui.parseComponentParams(componentParams);
+        }
         var element = getValue('element',params);
         var loaderCode = getValue('loader',params,null);
         var loaderClass = getValue('loaderClass',params,'');
