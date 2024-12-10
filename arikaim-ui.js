@@ -540,7 +540,7 @@ function Form() {
  */
 function ArikaimUI() {
     var self = this;
-    var version = '1.4.28';
+    var version = '1.4.29';
 
     this.form = new Form();
     this.template = new TemplateEngine();
@@ -613,7 +613,7 @@ function ArikaimUI() {
             var props = self.getAttributes(button);
 
             if (isEmpty(props['params']) == false) { 
-                props['params'] = this.parseComponentParams(props['params']);
+                props['params'] = arikaim.ui.parseComponentParams(props['params']);
             }
             callFunction(action,button);
 
