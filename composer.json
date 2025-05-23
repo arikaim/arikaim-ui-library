@@ -9,7 +9,8 @@
         "email": "info@arikaim.com",
         "homepage": "http://arikaim.com"
     }],
-    "require": {        
+    "require": {   
+        "arikaim/installer": "*"     
     },
     "extra": {
         "path": "arikaim-ui"

@@ -540,7 +540,7 @@ function Form() {
  */
 function ArikaimUI() {
     var self = this;
-    var version = '1.4.29';
+    var version = '1.4.30';
 
     this.form = new Form();
     this.template = new TemplateEngine();
@@ -558,7 +558,7 @@ function ArikaimUI() {
 
         element = $(element)[0];
         
-        $.each(element.attributes, function (index,attribute) {
+        $.each(element.attributes, function(index,attribute) {
             attrs[attribute.name] = (isEmpty(attribute.value) == true) ? null : attribute.value;
         });       
 
@@ -568,6 +568,10 @@ function ArikaimUI() {
     this.loadComponent = function(params, onSuccess, onError) {
         return arikaim.page.loadContent(params, onSuccess, onError);
     };
+
+    this.removeSubscribers = function(componentId, variableName) {
+        return arikaim.component.removeSubscribers(componentId,variableName);
+    }
 
     this.subscribe = function(componentId, variableName, callback) {
         return arikaim.component.subscribe(componentId,variableName,callback);
@@ -628,6 +632,9 @@ function ArikaimUI() {
             var button = this;
             self.disableButton(button);
           
+            var params = self.getAttributes(this);
+            Object.assign(this,{ params: params });
+            
             var result = callFunction(action,this);
             if (isPromise(result) == true) {
                 result.then(function(result) {
@@ -1279,7 +1286,7 @@ function ArikaimComponent(id, name, type, parentId, props) {
         }
        
         // emit event 
-        arikaim.component.emitEvent(this.getId(),name,value);         
+        arikaim.component.emitEvent(this.getId(),name,value,this);         
     }
 
     this.html = function(html) {
@@ -1301,7 +1308,7 @@ function ArikaimComponent(id, name, type, parentId, props) {
     this.setVar = function(name, value) {
         vars[name] = value;
         // emit event 
-        arikaim.component.emitEvent(this.getId(),name,value);
+        arikaim.component.emitEvent(this.getId(),name,value,this);
     };
 
     this.on = function(name, callback) {
@@ -1347,9 +1354,14 @@ function HtmlComponents() {
     this.loadedScripts = [];
     this.loadedListeners = [];
 
-    this.emitEvent = function(componentId, variableName, value) {
-        this.events.emit(getEventName(componentId,variableName),value);
+    this.emitEvent = function(componentId, variableName, value,component) {
+        this.events.emit(getEventName(componentId,variableName),value,component);
     };
+
+    this.removeSubscribers = function(componentId, variableName) {
+        var eventName = getEventName(componentId,variableName);
+        this.events.removeAllListeners(eventName);
+    }
 
     this.subscribe = function(componentId, variableName, callback, subscriberId) {
         if (isFunction(callback) == false) {
