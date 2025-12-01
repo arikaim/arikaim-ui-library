@@ -6,7 +6,9 @@
     "description": "Arikaim UI library",
     "repository": "https://github.com/arikaim/arikaim-ui-library.git",
     "files": [
-        "arikaim-ui-1.4.30.min.js"
+        "validator.js",
+        "arikaim-ui-1.4.30.min.js",
+        "form.js"
     ],
     "versions": {  
         "cdn": {
