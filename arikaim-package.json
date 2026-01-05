@@ -5,12 +5,15 @@
     "version": "1.4.30",
     "description": "Arikaim UI library",
     "repository": "https://github.com/arikaim/arikaim-ui-library.git",
-    "files": [
-        "validator.js",
-        "arikaim-ui-1.4.30.min.js",
-        "form.js"
+    "files": [     
+        "arikaim-ui-1.4.30.min.js"
     ],
     "versions": {  
+        "view": {
+            "files": [
+                "view.js"   
+            ]
+        }, 
         "cdn": {
             "files": [
                 "https://cdn.jsdelivr.net/gh/arikaim-repository/arikaim-ui-library@1.4.30/arikaim-ui-1.4.30.min.js"   
