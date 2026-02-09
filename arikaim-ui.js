@@ -471,9 +471,9 @@ function Form() {
         var hide = getValue('hide',options,2000);  
 
         if (error == true) {
-            selector = $(selector).find('.error.message');
+            selector = $(selector).find('.error.message')[0];
         } else {
-            selector = $(selector).find('.success.message');
+            selector = $(selector).find('.success.message')[0];
         }
        
         if (cssClass != null) {
@@ -975,7 +975,7 @@ function Page() {
 
         arikaim.component.setLoadedListener(id,callback);
 
-        var result = callFunction(callback,component);            
+        var result = callFunction(callback,component);  
         component = (result instanceof ArikaimComponent) ? result : component;
          // add component object      
         if (isObject(component) == true) {   
@@ -1479,15 +1479,17 @@ function HtmlComponents() {
             );
         
             var callback = self.loadedListeners[component.getId()];
-            if (isEmpty(callback) == true) {
-                callback = self.loadedListeners[item.name];
+           
+            if (isFunction(callback) == true) {
+                callback = self.loadedListeners[item.name];              
             }
-
+          
             if (isFunction(callback) == false) {
-                callback = self.loadedListeners[component.getName()]
+                callback = self.loadedListeners[component.getName()];
             }
 
             var result = callFunction(callback,component);    
+   
             component = (result instanceof ArikaimComponent) ? result : component;
             // add component object         
             self.add(component);
